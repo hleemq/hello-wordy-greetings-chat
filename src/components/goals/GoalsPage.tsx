@@ -197,7 +197,7 @@ const GoalsPage = () => {
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>{t('delete')}</p>
+                                <p>{t('deleteAction')}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -221,9 +221,9 @@ const GoalsPage = () => {
                           <Progress value={progress} className="h-2" />
                           
                           <div className="flex justify-between text-sm pt-1">
-                            <div className="text-gray-500">{monthsLeft} {t('monthsLeft')}</div>
+                            <div className="text-gray-500">{monthsLeft} {t('monthsRemaining')}</div>
                             <div className="font-medium">
-                              {t('save')} {monthlySavingsNeeded.toFixed(2)} MAD/{t('month')}
+                              {t('saveAction')} {monthlySavingsNeeded.toFixed(2)} MAD/{t('monthLabel')}
                             </div>
                           </div>
                         </div>

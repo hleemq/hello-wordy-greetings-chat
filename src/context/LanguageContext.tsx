@@ -87,6 +87,26 @@ const translations = {
     'monthsRemaining': 'months left',
     'noSavingsGoals': 'No savings goals added yet',
     'quickAddExpense': 'Quick Add Expense',
+    
+    // Dashboard
+    'balanceSummary': 'Balance Summary',
+    'currentBalance': 'Current Balance',
+    'balanceTooltip': 'This shows how expenses are split between Hasnaa and Achraf',
+    'hasnaaPaid': 'Hasnaa Paid',
+    'achrafPaid': 'Achraf Paid',
+    'owes': 'owes',
+    'balancedExpenses': 'Expenses are balanced',
+    'monthlySpending': 'Monthly Spending',
+    'overviewFor': 'Overview for',
+    'totalSpentThisMonth': 'Total spent this month',
+    'recentExpenses': 'Recent Expenses',
+    'by': 'by',
+    'noExpensesRecorded': 'No expenses recorded yet',
+    'goalProgress': 'Goal Progress',
+    'trackSavingsGoals': 'Track your savings goals',
+    'goalProgressTooltip': 'This shows your progress towards your savings goals',
+    'save': 'Save',
+    'month': 'month',
   },
   ar: {
     // Dashboard
@@ -165,6 +185,26 @@ const translations = {
     'monthsRemaining': 'شهر متبقي',
     'noSavingsGoals': 'لم تتم إضافة أهداف توفير بعد',
     'quickAddExpense': 'إضافة مصروف سريع',
+    
+    // Dashboard
+    'balanceSummary': 'ملخص الرصيد',
+    'currentBalance': 'الرصيد الحالي',
+    'balanceTooltip': 'يوضح هذا كيف يتم تقسيم النفقات بين حسناء وأشرف',
+    'hasnaaPaid': 'دفعت حسناء',
+    'achrafPaid': 'دفع أشرف',
+    'owes': 'مدين لـ',
+    'balancedExpenses': 'النفقات متوازنة',
+    'monthlySpending': 'الإنفاق الشهري',
+    'overviewFor': 'نظرة عامة لشهر',
+    'totalSpentThisMonth': 'إجمالي الإنفاق هذا الشهر',
+    'recentExpenses': 'المصاريف الأخيرة',
+    'by': 'بواسطة',
+    'noExpensesRecorded': 'لم يتم تسجيل أي مصاريف بعد',
+    'goalProgress': 'تقدم الهدف',
+    'trackSavingsGoals': 'تتبع أهداف التوفير الخاصة بك',
+    'goalProgressTooltip': 'يوضح هذا تقدمك نحو أهداف التوفير الخاصة بك',
+    'save': 'توفير',
+    'month': 'شهر',
   }
 };
 
