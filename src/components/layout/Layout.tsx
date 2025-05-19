@@ -14,7 +14,11 @@ const Layout = () => {
   const { isLoggedIn, currentView } = state;
 
   if (!isLoggedIn) {
-    return <LoginScreen />;
+    return (
+      <LanguageProvider>
+        <LoginScreen />
+      </LanguageProvider>
+    );
   }
 
   return (
