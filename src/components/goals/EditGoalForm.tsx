@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useFinance } from '@/context/FinanceContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +24,7 @@ const formatDateForInput = (date: Date): string => {
 
 const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
   const { dispatch } = useFinance();
+  const { t } = useLanguage();
   
   const [name, setName] = useState(goal.name);
   const [targetAmount, setTargetAmount] = useState(goal.targetAmount.toString());
@@ -47,8 +49,8 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
     
     if (isNaN(targetAmountValue) || targetAmountValue <= 0) {
       toast({
-        title: "Invalid target amount",
-        description: "Please enter a valid positive number",
+        title: t('invalidAmount'),
+        description: t('enterValidAmount'),
         variant: "destructive"
       });
       return;
@@ -56,8 +58,8 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
     
     if (isNaN(savedAmountValue) || savedAmountValue < 0) {
       toast({
-        title: "Invalid saved amount",
-        description: "Please enter a valid non-negative number",
+        title: t('invalidAmount'),
+        description: t('enterValidNonNegative'),
         variant: "destructive"
       });
       return;
@@ -65,8 +67,8 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
     
     if (savedAmountValue > targetAmountValue) {
       toast({
-        title: "Invalid amounts",
-        description: "Saved amount cannot be greater than target amount",
+        title: t('invalidAmounts'),
+        description: t('savedGreaterThanTarget'),
         variant: "destructive"
       });
       return;
@@ -84,8 +86,8 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
     dispatch({ type: 'UPDATE_GOAL', payload: updatedGoal });
     
     toast({
-      title: "Goal updated",
-      description: `Changes to "${name}" have been saved.`
+      title: t('goalUpdated'),
+      description: `${t('changesTo')} "${name}" ${t('saved')}.`
     });
     
     if (onSuccess) {
@@ -96,7 +98,7 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">Goal Name</Label>
+        <Label htmlFor="name">{t('savingsGoal')}</Label>
         <Input
           id="name"
           value={name}
@@ -107,7 +109,7 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="targetAmount">Target Amount ($)</Label>
+          <Label htmlFor="targetAmount">{t('targetAmount')} (MAD)</Label>
           <Input
             id="targetAmount"
             type="number"
@@ -120,7 +122,7 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="savedAmount">Saved Amount ($)</Label>
+          <Label htmlFor="savedAmount">{t('currentSavings')} (MAD)</Label>
           <Input
             id="savedAmount"
             type="number"
@@ -135,7 +137,7 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="deadline">Target Date</Label>
+          <Label htmlFor="deadline">{t('deadline')}</Label>
           <Input
             id="deadline"
             type="date"
@@ -146,16 +148,16 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="priority">Priority</Label>
+          <Label htmlFor="priority">{t('priority')}</Label>
           <Select value={priority} onValueChange={(value) => setPriority(value as GoalPriority)}>
             <SelectTrigger id="priority">
-              <SelectValue placeholder="Select priority" />
+              <SelectValue placeholder={t('selectPriority')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Important-Urgent">Important & Urgent</SelectItem>
-              <SelectItem value="Important-NotUrgent">Important, Not Urgent</SelectItem>
-              <SelectItem value="NotImportant-Urgent">Urgent, Not Important</SelectItem>
-              <SelectItem value="NotImportant-NotUrgent">Not Important or Urgent</SelectItem>
+              <SelectItem value="Important-Urgent">{t('importantUrgent')}</SelectItem>
+              <SelectItem value="Important-NotUrgent">{t('importantNotUrgent')}</SelectItem>
+              <SelectItem value="NotImportant-Urgent">{t('urgentNotImportant')}</SelectItem>
+              <SelectItem value="NotImportant-NotUrgent">{t('notImportantOrUrgent')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -163,10 +165,10 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
       
       <div className="flex justify-end space-x-2 pt-4">
         <Button type="button" variant="outline" onClick={onSuccess}>
-          Cancel
+          {t('cancel')}
         </Button>
         <Button type="submit">
-          Save Changes
+          {t('save')}
         </Button>
       </div>
     </form>

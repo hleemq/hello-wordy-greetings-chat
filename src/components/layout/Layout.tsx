@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useFinance } from '@/context/FinanceContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import Navigation from './Navigation';
@@ -12,11 +12,6 @@ import LoginScreen from '../auth/LoginScreen';
 const Layout = () => {
   const { state } = useFinance();
   const { isLoggedIn, currentView } = state;
-
-  // Set the default direction to RTL when the component mounts
-  useEffect(() => {
-    document.documentElement.dir = 'rtl';
-  }, []);
 
   if (!isLoggedIn) {
     return <LoginScreen />;

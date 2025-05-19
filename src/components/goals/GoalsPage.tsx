@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useFinance } from '@/context/FinanceContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -13,14 +14,31 @@ import { Goal } from '@/types/finance';
 
 const GoalsPage = () => {
   const { state, dispatch } = useFinance();
+  const { t } = useLanguage();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   
   const priorityMatrix = {
-    "Important-Urgent": { label: "Important & Urgent", color: "bg-red-100 text-red-800", borderColor: "border-red-200" },
-    "Important-NotUrgent": { label: "Important, Not Urgent", color: "bg-blue-100 text-blue-800", borderColor: "border-blue-200" },
-    "NotImportant-Urgent": { label: "Urgent, Not Important", color: "bg-yellow-100 text-yellow-800", borderColor: "border-yellow-200" },
-    "NotImportant-NotUrgent": { label: "Not Important or Urgent", color: "bg-gray-100 text-gray-800", borderColor: "border-gray-200" }
+    "Important-Urgent": { 
+      label: t('importantUrgent'), 
+      color: "bg-red-100 text-red-800", 
+      borderColor: "border-red-200" 
+    },
+    "Important-NotUrgent": { 
+      label: t('importantNotUrgent'), 
+      color: "bg-blue-100 text-blue-800", 
+      borderColor: "border-blue-200" 
+    },
+    "NotImportant-Urgent": { 
+      label: t('urgentNotImportant'), 
+      color: "bg-yellow-100 text-yellow-800", 
+      borderColor: "border-yellow-200" 
+    },
+    "NotImportant-NotUrgent": { 
+      label: t('notImportantOrUrgent'), 
+      color: "bg-gray-100 text-gray-800", 
+      borderColor: "border-gray-200" 
+    }
   };
 
   const deleteGoal = (id: string) => {
@@ -56,21 +74,21 @@ const GoalsPage = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Savings Goals</h1>
-          <p className="text-gray-600 mt-1">Track and manage your financial goals</p>
+          <h1 className="text-2xl font-bold">{t('savingsGoal')}</h1>
+          <p className="text-gray-600 mt-1">{t('trackSavingsGoals')}</p>
         </div>
         
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="mt-4 md:mt-0" id="add-goal-button">
-              <PlusCircle className="h-4 w-4 mr-2" /> Add New Goal
+              <PlusCircle className="h-4 w-4 mr-2" /> {t('addGoal')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Add New Savings Goal</DialogTitle>
+              <DialogTitle>{t('addGoal')}</DialogTitle>
               <DialogDescription>
-                Create a new goal to help track your savings progress
+                {t('trackSavingsGoals')}
               </DialogDescription>
             </DialogHeader>
             <AddGoalForm onSuccess={() => setDialogOpen(false)} />
@@ -84,7 +102,7 @@ const GoalsPage = () => {
           <Card className="mb-8">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>Priority Matrix Explained</CardTitle>
+                <CardTitle>{t('priority')}</CardTitle>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -93,7 +111,7 @@ const GoalsPage = () => {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-sm">
-                      <p>The priority matrix helps prioritize your goals based on importance and urgency.</p>
+                      <p>{t('goalProgressTooltip')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -102,20 +120,20 @@ const GoalsPage = () => {
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div className={`p-4 rounded-md ${priorityMatrix["Important-Urgent"].color} border ${priorityMatrix["Important-Urgent"].borderColor}`}>
-                  <h3 className="font-medium mb-1">Important & Urgent</h3>
-                  <p className="text-sm">Critical goals that need immediate attention.</p>
+                  <h3 className="font-medium mb-1">{t('importantUrgent')}</h3>
+                  <p className="text-sm">{t('trackSavingsGoals')}</p>
                 </div>
                 <div className={`p-4 rounded-md ${priorityMatrix["Important-NotUrgent"].color} border ${priorityMatrix["Important-NotUrgent"].borderColor}`}>
-                  <h3 className="font-medium mb-1">Important, Not Urgent</h3>
-                  <p className="text-sm">Long-term goals that are meaningful but can be planned.</p>
+                  <h3 className="font-medium mb-1">{t('importantNotUrgent')}</h3>
+                  <p className="text-sm">{t('trackSavingsGoals')}</p>
                 </div>
                 <div className={`p-4 rounded-md ${priorityMatrix["NotImportant-Urgent"].color} border ${priorityMatrix["NotImportant-Urgent"].borderColor}`}>
-                  <h3 className="font-medium mb-1">Urgent, Not Important</h3>
-                  <p className="text-sm">Short-term goals that need quick action but aren't critical.</p>
+                  <h3 className="font-medium mb-1">{t('urgentNotImportant')}</h3>
+                  <p className="text-sm">{t('trackSavingsGoals')}</p>
                 </div>
                 <div className={`p-4 rounded-md ${priorityMatrix["NotImportant-NotUrgent"].color} border ${priorityMatrix["NotImportant-NotUrgent"].borderColor}`}>
-                  <h3 className="font-medium mb-1">Not Important or Urgent</h3>
-                  <p className="text-sm">Nice-to-have goals that can be addressed when time allows.</p>
+                  <h3 className="font-medium mb-1">{t('notImportantOrUrgent')}</h3>
+                  <p className="text-sm">{t('trackSavingsGoals')}</p>
                 </div>
               </div>
             </CardContent>
@@ -146,7 +164,7 @@ const GoalsPage = () => {
                         <div>
                           <CardTitle>{goal.name}</CardTitle>
                           <CardDescription>
-                            Due by {new Date(goal.deadline).toLocaleDateString()}
+                            {t('due')} {new Date(goal.deadline).toLocaleDateString()}
                           </CardDescription>
                         </div>
                         <div className="flex space-x-1">
@@ -162,7 +180,7 @@ const GoalsPage = () => {
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Edit goal</p>
+                                <p>{t('edit')}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -179,7 +197,7 @@ const GoalsPage = () => {
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Delete goal</p>
+                                <p>{t('delete')}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -189,13 +207,13 @@ const GoalsPage = () => {
                         <div className="space-y-4">
                           <div className="flex justify-between">
                             <div>
-                              <div className="text-sm text-gray-500">Progress</div>
+                              <div className="text-sm text-gray-500">{t('goalProgress')}</div>
                               <div className="text-lg font-semibold">{progress}%</div>
                             </div>
                             <div className="text-right">
-                              <div className="text-sm text-gray-500">Saved</div>
+                              <div className="text-sm text-gray-500">{t('currentSavings')}</div>
                               <div className="text-lg font-semibold">
-                                ${goal.savedAmount.toFixed(2)} <span className="text-xs text-gray-500">of ${goal.targetAmount.toFixed(2)}</span>
+                                {goal.savedAmount.toFixed(2)} MAD <span className="text-xs text-gray-500">{t('of')} {goal.targetAmount.toFixed(2)} MAD</span>
                               </div>
                             </div>
                           </div>
@@ -203,9 +221,9 @@ const GoalsPage = () => {
                           <Progress value={progress} className="h-2" />
                           
                           <div className="flex justify-between text-sm pt-1">
-                            <div className="text-gray-500">{monthsLeft} months remaining</div>
+                            <div className="text-gray-500">{monthsLeft} {t('monthsLeft')}</div>
                             <div className="font-medium">
-                              Need to save ${monthlySavingsNeeded.toFixed(2)}/month
+                              {t('save')} {monthlySavingsNeeded.toFixed(2)} MAD/{t('month')}
                             </div>
                           </div>
                         </div>
@@ -220,12 +238,12 @@ const GoalsPage = () => {
       ) : (
         <div className="text-center py-16 border rounded-lg bg-gray-50">
           <div className="max-w-md mx-auto">
-            <h3 className="text-xl font-semibold mb-2">No Goals Yet</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('noSavingsGoals')}</h3>
             <p className="text-gray-600 mb-6">
-              Start by adding your first savings goal to track your progress
+              {t('trackSavingsGoals')}
             </p>
             <Button onClick={() => setDialogOpen(true)}>
-              <PlusCircle className="h-4 w-4 mr-2" /> Add Your First Goal
+              <PlusCircle className="h-4 w-4 mr-2" /> {t('addGoal')}
             </Button>
           </div>
         </div>
@@ -236,9 +254,9 @@ const GoalsPage = () => {
         <Dialog open={!!editingGoal} onOpenChange={(open) => !open && setEditingGoal(null)}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit Savings Goal</DialogTitle>
+              <DialogTitle>{t('edit')}</DialogTitle>
               <DialogDescription>
-                Update the details for "{editingGoal.name}"
+                {t('update')} "{editingGoal.name}"
               </DialogDescription>
             </DialogHeader>
             <EditGoalForm goal={editingGoal} onSuccess={() => setEditingGoal(null)} />
