@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useFinance } from '@/context/FinanceContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,7 @@ const formatDateForInput = (date: Date): string => {
 
 const AddExpenseForm = () => {
   const { state, dispatch } = useFinance();
+  const { t } = useLanguage();
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<ExpenseCategory>('Groceries');
   const [date, setDate] = useState(formatDateForInput(new Date()));
@@ -64,7 +66,7 @@ const AddExpenseForm = () => {
     
     toast({
       title: "Expense added",
-      description: `$${amountValue.toFixed(2)} for ${category} has been added.`
+      description: `${amountValue.toFixed(2)} MAD for ${t(category.toLowerCase())} has been added.`
     });
   };
 
@@ -73,7 +75,7 @@ const AddExpenseForm = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="amount">Amount ($)</Label>
+            <Label htmlFor="amount">{t('amount')}</Label>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -97,14 +99,14 @@ const AddExpenseForm = () => {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
+          <Label htmlFor="category">{t('category')}</Label>
           <Select value={category} onValueChange={(value) => setCategory(value as ExpenseCategory)}>
             <SelectTrigger id="category">
-              <SelectValue placeholder="Select category" />
+              <SelectValue placeholder={t('category')} />
             </SelectTrigger>
             <SelectContent>
               {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                <SelectItem key={cat} value={cat}>{t(cat.toLowerCase())}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -113,7 +115,7 @@ const AddExpenseForm = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="date">Date</Label>
+          <Label htmlFor="date">{t('date')}</Label>
           <Input
             id="date"
             type="date"
@@ -125,7 +127,7 @@ const AddExpenseForm = () => {
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label>Paid by</Label>
+            <Label>{t('paidBy')}</Label>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -147,7 +149,7 @@ const AddExpenseForm = () => {
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes (optional)</Label>
+        <Label htmlFor="notes">{t('notes')}</Label>
         <Textarea 
           id="notes"
           placeholder="Add any additional details..."
@@ -157,7 +159,7 @@ const AddExpenseForm = () => {
         />
       </div>
       
-      <Button type="submit" className="w-full">Add Expense</Button>
+      <Button type="submit" className="w-full">{t('addExpense')}</Button>
     </form>
   );
 };

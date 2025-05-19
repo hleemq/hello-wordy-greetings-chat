@@ -1,13 +1,15 @@
 
 import React from 'react';
 import { useFinance } from '@/context/FinanceContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { LogOut, HelpCircle } from 'lucide-react';
+import { LogOut, Globe } from 'lucide-react';
 
 const Navigation = () => {
   const { state, dispatch } = useFinance();
   const { currentView, activeProfile } = state;
+  const { language, setLanguage, t } = useLanguage();
 
   const switchProfile = () => {
     dispatch({ 
@@ -20,11 +22,15 @@ const Navigation = () => {
     dispatch({ type: 'LOGOUT' });
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'ar' : 'en');
+  };
+
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'expenses', label: 'Expenses' },
-    { id: 'goals', label: 'Goals' },
-    { id: 'reports', label: 'Reports' },
+    { id: 'dashboard', label: t('dashboard') },
+    { id: 'expenses', label: t('expenses') },
+    { id: 'goals', label: t('goals') },
+    { id: 'reports', label: t('reports') },
   ];
 
   return (
@@ -33,7 +39,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <span className="text-lg font-bold">Finance Tracker</span>
+              <span className="text-lg font-bold">{t('financeTracker')}</span>
             </div>
             <nav className="hidden md:ml-6 md:flex space-x-4">
               {navItems.map((item) => (
@@ -60,11 +66,24 @@ const Navigation = () => {
                     onClick={switchProfile}
                     className="relative"
                   >
-                    <span>Active: {activeProfile}</span>
+                    <span>{t('active')}: {activeProfile}</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Switch between profiles</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={toggleLanguage}>
+                    <Globe className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('language')}: {language === 'en' ? 'English' : 'العربية'}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -77,7 +96,7 @@ const Navigation = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Log out</p>
+                  <p>{t('logout')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

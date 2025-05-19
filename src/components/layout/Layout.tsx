@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useFinance } from '@/context/FinanceContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import Navigation from './Navigation';
 import Dashboard from '../dashboard/Dashboard';
 import ExpensesPage from '../expenses/ExpensesPage';
@@ -17,15 +18,17 @@ const Layout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <main>
-        {currentView === 'dashboard' && <Dashboard />}
-        {currentView === 'expenses' && <ExpensesPage />}
-        {currentView === 'goals' && <GoalsPage />}
-        {currentView === 'reports' && <ReportsPage />}
-      </main>
-    </div>
+    <LanguageProvider>
+      <div className="min-h-screen bg-gray-50" dir={window.document.documentElement.dir}>
+        <Navigation />
+        <main>
+          {currentView === 'dashboard' && <Dashboard />}
+          {currentView === 'expenses' && <ExpensesPage />}
+          {currentView === 'goals' && <GoalsPage />}
+          {currentView === 'reports' && <ReportsPage />}
+        </main>
+      </div>
+    </LanguageProvider>
   );
 };
 
