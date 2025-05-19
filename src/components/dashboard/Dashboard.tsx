@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useFinance } from '@/context/FinanceContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 
 const Dashboard = () => {
   const { state } = useFinance();
+  const { t } = useLanguage();
   const { expenses, goals, balance } = state;
 
   // Get recent expenses
@@ -58,8 +60,8 @@ const Dashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Balance Summary</CardTitle>
-              <CardDescription>Current balance between profiles</CardDescription>
+              <CardTitle>{t('balanceSummary')}</CardTitle>
+              <CardDescription>{t('currentBalance')}</CardDescription>
             </div>
             <TooltipProvider>
               <Tooltip>
@@ -69,7 +71,7 @@ const Dashboard = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="w-80">
-                  <p>This shows the current balance between both profiles. If there's a difference, it shows who owes money to balance expenses.</p>
+                  <p>{t('balanceTooltip')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -78,25 +80,25 @@ const Dashboard = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="border rounded p-4 text-center">
-                  <div className="text-sm text-gray-500">Hasnaa paid</div>
-                  <div className="text-xl font-semibold">${balance.hasnaaPaid.toFixed(2)}</div>
+                  <div className="text-sm text-gray-500">{t('hasnaaPaid')}</div>
+                  <div className="text-xl font-semibold">{balance.hasnaaPaid.toFixed(2)} MAD</div>
                 </div>
                 <div className="border rounded p-4 text-center">
-                  <div className="text-sm text-gray-500">Achraf paid</div>
-                  <div className="text-xl font-semibold">${balance.achrafPaid.toFixed(2)}</div>
+                  <div className="text-sm text-gray-500">{t('achrafPaid')}</div>
+                  <div className="text-xl font-semibold">{balance.achrafPaid.toFixed(2)} MAD</div>
                 </div>
               </div>
 
               <div className="border-t pt-4">
                 {balance.whoOwes ? (
                   <div className="text-center p-3 bg-gray-50 rounded-md">
-                    <span className="font-medium">{balance.whoOwes}</span> owes{' '}
+                    <span className="font-medium">{balance.whoOwes}</span> {t('owes')}{' '}
                     <span className="font-medium">{balance.whoOwes === 'Hasnaa' ? 'Achraf' : 'Hasnaa'}</span>{' '}
-                    <span className="text-lg font-semibold">${balance.amount.toFixed(2)}</span>
+                    <span className="text-lg font-semibold">{balance.amount.toFixed(2)} MAD</span>
                   </div>
                 ) : (
                   <div className="text-center p-3 bg-gray-50 rounded-md">
-                    <span className="text-gray-600">All expenses are perfectly balanced</span>
+                    <span className="text-gray-600">{t('balancedExpenses')}</span>
                   </div>
                 )}
               </div>
@@ -108,36 +110,38 @@ const Dashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Monthly Spending</CardTitle>
-              <CardDescription>Overview for {new Date().toLocaleString('default', { month: 'long' })}</CardDescription>
+              <CardTitle>{t('monthlySpending')}</CardTitle>
+              <CardDescription>
+                {t('overviewFor')} {new Date().toLocaleString('default', { month: 'long' })}
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               <div className="text-center">
-                <div className="text-3xl font-bold">${totalSpentThisMonth.toFixed(2)}</div>
-                <div className="text-sm text-gray-500">Total spent this month</div>
+                <div className="text-3xl font-bold">{totalSpentThisMonth.toFixed(2)} MAD</div>
+                <div className="text-sm text-gray-500">{t('totalSpentThisMonth')}</div>
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-medium">Recent expenses</h4>
+                <h4 className="text-sm font-medium">{t('recentExpenses')}</h4>
                 {recentExpenses.length > 0 ? (
                   <div className="space-y-2">
                     {recentExpenses.map(expense => (
                       <div key={expense.id} className="flex justify-between items-center text-sm p-2 border-b">
                         <div>
-                          <div>{expense.category}</div>
+                          <div>{t(expense.category.toLowerCase())}</div>
                           <div className="text-xs text-gray-500">
-                            {new Date(expense.date).toLocaleDateString()} by {expense.paidBy}
+                            {new Date(expense.date).toLocaleDateString()} {t('by')} {expense.paidBy}
                           </div>
                         </div>
-                        <div className="font-medium">${expense.amount.toFixed(2)}</div>
+                        <div className="font-medium">{expense.amount.toFixed(2)} MAD</div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-3 text-gray-500 text-sm">
-                    No expenses recorded yet
+                    {t('noExpensesRecorded')}
                   </div>
                 )}
               </div>
@@ -149,8 +153,8 @@ const Dashboard = () => {
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Goal Progress</CardTitle>
-              <CardDescription>Track your savings goals</CardDescription>
+              <CardTitle>{t('goalProgress')}</CardTitle>
+              <CardDescription>{t('trackSavingsGoals')}</CardDescription>
             </div>
             <TooltipProvider>
               <Tooltip>
@@ -160,7 +164,7 @@ const Dashboard = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="w-80">
-                  <p>Track progress toward your shared goals. Goals are sorted by priority and progress.</p>
+                  <p>{t('goalProgressTooltip')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -182,10 +186,10 @@ const Dashboard = () => {
                     : 0;
 
                   const priorityLabels = {
-                    "Important-Urgent": "Important & Urgent",
-                    "Important-NotUrgent": "Important, Not Urgent",
-                    "NotImportant-Urgent": "Urgent, Not Important",
-                    "NotImportant-NotUrgent": "Not Important or Urgent"
+                    "Important-Urgent": t('importantUrgent'),
+                    "Important-NotUrgent": t('importantNotUrgent'),
+                    "NotImportant-Urgent": t('urgentNotImportant'),
+                    "NotImportant-NotUrgent": t('notImportantOrUrgent')
                   };
                   
                   const priorityColors = {
@@ -205,22 +209,22 @@ const Dashboard = () => {
                               {priorityLabels[goal.priority]}
                             </span>
                             <span className="text-xs text-gray-500">
-                              Due {new Date(goal.deadline).toLocaleDateString()}
+                              {t('due')} {new Date(goal.deadline).toLocaleDateString()}
                             </span>
                           </div>
                         </div>
                         <div className="mt-2 md:mt-0 text-right">
-                          <div className="text-sm font-medium">${goal.savedAmount} / ${goal.targetAmount}</div>
+                          <div className="text-sm font-medium">{goal.savedAmount} / {goal.targetAmount} MAD</div>
                           <div className="text-xs text-gray-500">
-                            Save ${monthlySavingsNeeded.toFixed(2)}/month
+                            {t('save')} {monthlySavingsNeeded.toFixed(2)} MAD/{t('month')}
                           </div>
                         </div>
                       </div>
                       <div className="mt-2">
                         <Progress value={progress} className="h-2" />
                         <div className="flex justify-between mt-1">
-                          <span className="text-xs text-gray-500">{progress}% complete</span>
-                          <span className="text-xs text-gray-500">{monthsLeft} months left</span>
+                          <span className="text-xs text-gray-500">{progress}% {t('complete')}</span>
+                          <span className="text-xs text-gray-500">{monthsLeft} {t('monthsLeft')}</span>
                         </div>
                       </div>
                     </div>
@@ -229,11 +233,11 @@ const Dashboard = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <p className="mb-4">No savings goals added yet</p>
+                <p className="mb-4">{t('noSavingsGoals')}</p>
                 <Button variant="outline" size="sm" onClick={() => 
                   document.getElementById('add-goal-button')?.click()
                 }>
-                  Add a Goal
+                  {t('addGoal')}
                 </Button>
               </div>
             )}
@@ -243,7 +247,7 @@ const Dashboard = () => {
 
       {/* Quick Add Expense */}
       <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Quick Add Expense</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('quickAddExpense')}</h2>
         <AddExpenseForm />
       </div>
     </div>

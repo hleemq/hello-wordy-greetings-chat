@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 type LanguageType = 'en' | 'ar';
 
@@ -73,6 +73,34 @@ const translations = {
     'compareSpending': 'Compare spending patterns between profiles',
     'spending': 'Spending',
     'noExpenseData': 'No expense data available for',
+
+    // Dashboard additions
+    'balanceSummary': 'Balance Summary',
+    'currentBalance': 'Current balance between profiles',
+    'balanceTooltip': 'This shows the current balance between both profiles. If there\'s a difference, it shows who owes money to balance expenses.',
+    'hasnaaPaid': 'Hasnaa paid',
+    'achrafPaid': 'Achraf paid',
+    'owes': 'owes',
+    'balancedExpenses': 'All expenses are perfectly balanced',
+    'overviewFor': 'Overview for',
+    'totalSpentThisMonth': 'Total spent this month',
+    'recentExpenses': 'Recent expenses',
+    'by': 'by',
+    'noExpensesRecorded': 'No expenses recorded yet',
+    'goalProgress': 'Goal Progress',
+    'trackSavingsGoals': 'Track your savings goals',
+    'goalProgressTooltip': 'Track progress toward your shared goals. Goals are sorted by priority and progress.',
+    'importantUrgent': 'Important & Urgent',
+    'importantNotUrgent': 'Important, Not Urgent',
+    'urgentNotImportant': 'Urgent, Not Important',
+    'notImportantOrUrgent': 'Not Important or Urgent',
+    'due': 'Due',
+    'save': 'Save',
+    'month': 'month',
+    'complete': 'complete',
+    'monthsLeft': 'months left',
+    'noSavingsGoals': 'No savings goals added yet',
+    'quickAddExpense': 'Quick Add Expense',
   },
   ar: {
     // Dashboard
@@ -137,13 +165,46 @@ const translations = {
     'compareSpending': 'مقارنة أنماط الإنفاق بين الملفات الشخصية',
     'spending': 'الإنفاق',
     'noExpenseData': 'لا توجد بيانات مصاريف متاحة لـ',
+
+    // Dashboard additions
+    'balanceSummary': 'ملخص الرصيد',
+    'currentBalance': 'الرصيد الحالي بين الملفات الشخصية',
+    'balanceTooltip': 'يوضح هذا الرصيد الحالي بين كلا الملفين الشخصيين. في حالة وجود فرق، يظهر من يدين بالمال لموازنة المصاريف.',
+    'hasnaaPaid': 'دفعت حسناء',
+    'achrafPaid': 'دفع أشرف',
+    'owes': 'يدين لـ',
+    'balancedExpenses': 'جميع المصاريف متوازنة تمامًا',
+    'overviewFor': 'نظرة عامة لـ',
+    'totalSpentThisMonth': 'إجمالي الإنفاق هذا الشهر',
+    'recentExpenses': 'المصاريف الأخيرة',
+    'by': 'بواسطة',
+    'noExpensesRecorded': 'لم يتم تسجيل أي مصاريف بعد',
+    'goalProgress': 'تقدم الهدف',
+    'trackSavingsGoals': 'تتبع أهداف التوفير الخاصة بك',
+    'goalProgressTooltip': 'تتبع التقدم نحو أهدافك المشتركة. يتم ترتيب الأهداف حسب الأولوية والتقدم.',
+    'importantUrgent': 'مهم وعاجل',
+    'importantNotUrgent': 'مهم، غير عاجل',
+    'urgentNotImportant': 'عاجل، غير مهم',
+    'notImportantOrUrgent': 'غير مهم أو عاجل',
+    'due': 'تاريخ الاستحقاق',
+    'save': 'توفير',
+    'month': 'الشهر',
+    'complete': 'مكتمل',
+    'monthsLeft': 'شهر متبقي',
+    'noSavingsGoals': 'لم تتم إضافة أهداف توفير بعد',
+    'quickAddExpense': 'إضافة مصروف سريع',
   }
 };
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<LanguageType>('en');
+  const [language, setLanguage] = useState<LanguageType>('ar');
+
+  useEffect(() => {
+    // Set RTL direction when language is Arabic
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+  }, [language]);
 
   const t = (key: string): string => {
     return translations[language][key] || key;

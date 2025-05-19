@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useFinance } from '@/context/FinanceContext';
 import { useLanguage } from '@/context/LanguageContext';
