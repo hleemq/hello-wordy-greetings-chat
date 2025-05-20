@@ -4,7 +4,7 @@ import { useFinance } from '@/context/FinanceContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { LogOut, Globe } from 'lucide-react';
+import { LogOut, Globe, UserRound } from 'lucide-react';
 
 const Navigation = () => {
   const { state, dispatch } = useFinance();
@@ -64,8 +64,13 @@ const Navigation = () => {
                   <Button
                     variant="outline"
                     onClick={switchProfile}
-                    className="relative"
+                    className="relative flex items-center gap-2"
                   >
+                    {activeProfile === 'Hasnaa' ? (
+                      <UserRound className="h-5 w-5" style={{ color: '#FFDEE2' }} />
+                    ) : (
+                      <UserRound className="h-5 w-5" style={{ color: '#1EAEDB' }} />
+                    )}
                     <span>{t('active')}: {activeProfile}</span>
                   </Button>
                 </TooltipTrigger>

@@ -60,7 +60,7 @@ const translations = {
     'edit': 'Edit',
     'update': 'Update the details for',
     'cancel': 'Cancel',
-    'save': 'Save',
+    'saveChanges': 'Save',
     'deleteAction': 'Delete',
     'invalidAmount': 'Invalid amount',
     'enterValidAmount': 'Please enter a valid positive number',
@@ -88,7 +88,7 @@ const translations = {
     'noSavingsGoals': 'No savings goals added yet',
     'quickAddExpense': 'Quick Add Expense',
     
-    // Dashboard
+    // Dashboard specific
     'balanceSummary': 'Balance Summary',
     'currentBalance': 'Current Balance',
     'balanceTooltip': 'This shows how expenses are split between Hasnaa and Achraf',
@@ -105,8 +105,8 @@ const translations = {
     'goalProgress': 'Goal Progress',
     'trackSavingsGoals': 'Track your savings goals',
     'goalProgressTooltip': 'This shows your progress towards your savings goals',
-    'save': 'Save',
-    'month': 'month',
+    'saveMontly': 'Save',
+    'monthPeriod': 'month',
   },
   ar: {
     // Dashboard
@@ -158,7 +158,7 @@ const translations = {
     'edit': 'تعديل',
     'update': 'تحديث تفاصيل',
     'cancel': 'إلغاء',
-    'save': 'حفظ',
+    'saveChanges': 'حفظ',
     'deleteAction': 'حذف',
     'invalidAmount': 'مبلغ غير صالح',
     'enterValidAmount': 'الرجاء إدخال رقم إيجابي صالح',
@@ -186,7 +186,7 @@ const translations = {
     'noSavingsGoals': 'لم تتم إضافة أهداف توفير بعد',
     'quickAddExpense': 'إضافة مصروف سريع',
     
-    // Dashboard
+    // Dashboard specific
     'balanceSummary': 'ملخص الرصيد',
     'currentBalance': 'الرصيد الحالي',
     'balanceTooltip': 'يوضح هذا كيف يتم تقسيم النفقات بين حسناء وأشرف',
@@ -203,8 +203,8 @@ const translations = {
     'goalProgress': 'تقدم الهدف',
     'trackSavingsGoals': 'تتبع أهداف التوفير الخاصة بك',
     'goalProgressTooltip': 'يوضح هذا تقدمك نحو أهداف التوفير الخاصة بك',
-    'save': 'توفير',
-    'month': 'شهر',
+    'saveMontly': 'توفير',
+    'monthPeriod': 'شهر',
   }
 };
 
