@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from '@/components/ui/use-toast';
-import { v4 as uuidv4 } from 'uuid';
 import { GoalPriority } from '@/types/finance';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AddGoalFormProps {
   onSuccess?: () => void;
@@ -38,9 +38,11 @@ const AddGoalForm: React.FC<AddGoalFormProps> = ({ onSuccess }) => {
   const [savedAmount, setSavedAmount] = useState('0');
   const [deadline, setDeadline] = useState(getDefaultDeadline());
   const [priority, setPriority] = useState<GoalPriority>('Important-NotUrgent');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
     const targetAmountValue = parseFloat(targetAmount);
     const savedAmountValue = parseFloat(savedAmount) || 0;
@@ -51,6 +53,7 @@ const AddGoalForm: React.FC<AddGoalFormProps> = ({ onSuccess }) => {
         description: t('enterValidAmount'),
         variant: "destructive"
       });
+      setLoading(false);
       return;
     }
     
@@ -60,6 +63,7 @@ const AddGoalForm: React.FC<AddGoalFormProps> = ({ onSuccess }) => {
         description: t('enterValidNonNegative'),
         variant: "destructive"
       });
+      setLoading(false);
       return;
     }
     
@@ -69,27 +73,60 @@ const AddGoalForm: React.FC<AddGoalFormProps> = ({ onSuccess }) => {
         description: t('savedGreaterThanTarget'),
         variant: "destructive"
       });
+      setLoading(false);
       return;
     }
     
-    const goal = {
-      id: uuidv4(),
-      name,
-      targetAmount: targetAmountValue,
-      savedAmount: savedAmountValue,
-      deadline: new Date(deadline),
-      priority
-    };
-    
-    dispatch({ type: 'ADD_GOAL', payload: goal });
-    
-    toast({
-      title: t('goalCreated'),
-      description: `"${name}" ${t('hasBeenAdded')}`
-    });
-    
-    if (onSuccess) {
-      onSuccess();
+    try {
+      // Create goal object for database
+      const goalData = {
+        name,
+        target_amount: targetAmountValue,
+        saved_amount: savedAmountValue,
+        deadline: new Date(deadline),
+        priority
+      };
+      
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('goals')
+        .insert(goalData)
+        .select()
+        .single();
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Add to local state
+      const goal = {
+        id: data.id,
+        name,
+        targetAmount: targetAmountValue,
+        savedAmount: savedAmountValue,
+        deadline: new Date(deadline),
+        priority
+      };
+      
+      dispatch({ type: 'ADD_GOAL', payload: goal });
+      
+      toast({
+        title: t('goalCreated'),
+        description: `"${name}" ${t('hasBeenAdded')}`
+      });
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error: any) {
+      console.error('Error adding goal:', error);
+      toast({
+        title: t('errorAddingGoal'),
+        description: error.message || t('anErrorOccurred'),
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -167,8 +204,8 @@ const AddGoalForm: React.FC<AddGoalFormProps> = ({ onSuccess }) => {
         <Button type="button" variant="outline" onClick={onSuccess}>
           {t('cancel')}
         </Button>
-        <Button type="submit">
-          {t('addGoal')}
+        <Button type="submit" disabled={loading}>
+          {loading ? t('adding') : t('addGoal')}
         </Button>
       </div>
     </form>

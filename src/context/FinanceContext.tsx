@@ -1,6 +1,8 @@
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Expense, Goal, Profile, Balance } from '@/types/finance';
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from '@/components/ui/use-toast';
 
 interface FinanceState {
   expenses: Expense[];
@@ -9,6 +11,7 @@ interface FinanceState {
   activeProfile: Profile;
   balance: Balance;
   currentView: 'dashboard' | 'expenses' | 'goals' | 'reports';
+  loading: boolean;
 }
 
 type Action = 
@@ -16,10 +19,13 @@ type Action =
   | { type: 'LOGOUT' }
   | { type: 'SWITCH_PROFILE', payload: Profile }
   | { type: 'ADD_EXPENSE', payload: Expense }
+  | { type: 'SET_EXPENSES', payload: Expense[] }
   | { type: 'DELETE_EXPENSE', payload: string }
   | { type: 'ADD_GOAL', payload: Goal }
+  | { type: 'SET_GOALS', payload: Goal[] }
   | { type: 'UPDATE_GOAL', payload: Goal }
   | { type: 'DELETE_GOAL', payload: string }
+  | { type: 'SET_LOADING', payload: boolean }
   | { type: 'CHANGE_VIEW', payload: 'dashboard' | 'expenses' | 'goals' | 'reports' };
 
 const calculateBalance = (expenses: Expense[]): Balance => {
@@ -56,38 +62,7 @@ const initialState: FinanceState = {
   activeProfile: 'Hasnaa',
   balance: { hasnaaPaid: 0, achrafPaid: 0, difference: 0, whoOwes: null, amount: 0 },
   currentView: 'dashboard',
-};
-
-// Try to load state from localStorage
-const loadState = (): FinanceState => {
-  try {
-    const savedState = localStorage.getItem('financeState');
-    if (savedState) {
-      const parsedState = JSON.parse(savedState);
-      
-      // Convert string dates back to Date objects
-      const expenses = parsedState.expenses.map((expense: any) => ({
-        ...expense,
-        date: new Date(expense.date)
-      }));
-      
-      const goals = parsedState.goals.map((goal: any) => ({
-        ...goal,
-        deadline: new Date(goal.deadline)
-      }));
-      
-      return {
-        ...parsedState,
-        expenses,
-        goals,
-        balance: calculateBalance(expenses),
-        isLoggedIn: false // Always start logged out
-      };
-    }
-  } catch (error) {
-    console.error('Failed to load state from localStorage', error);
-  }
-  return initialState;
+  loading: true
 };
 
 const reducer = (state: FinanceState, action: Action): FinanceState => {
@@ -98,6 +73,13 @@ const reducer = (state: FinanceState, action: Action): FinanceState => {
       return { ...state, isLoggedIn: false };
     case 'SWITCH_PROFILE':
       return { ...state, activeProfile: action.payload };
+    case 'SET_EXPENSES': {
+      return { 
+        ...state, 
+        expenses: action.payload,
+        balance: calculateBalance(action.payload)
+      };
+    }
     case 'ADD_EXPENSE': {
       const newExpenses = [...state.expenses, action.payload];
       return { 
@@ -114,6 +96,8 @@ const reducer = (state: FinanceState, action: Action): FinanceState => {
         balance: calculateBalance(newExpenses)
       };
     }
+    case 'SET_GOALS':
+      return { ...state, goals: action.payload };
     case 'ADD_GOAL':
       return { ...state, goals: [...state.goals, action.payload] };
     case 'UPDATE_GOAL': {
@@ -124,6 +108,8 @@ const reducer = (state: FinanceState, action: Action): FinanceState => {
     }
     case 'DELETE_GOAL':
       return { ...state, goals: state.goals.filter(g => g.id !== action.payload) };
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload };
     case 'CHANGE_VIEW':
       return { ...state, currentView: action.payload };
     default:
@@ -140,12 +126,134 @@ const FinanceContext = createContext<{
 });
 
 export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, loadState());
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Save to localStorage whenever state changes
+  // Fetch expenses from Supabase when component mounts
   useEffect(() => {
-    localStorage.setItem('financeState', JSON.stringify(state));
-  }, [state]);
+    const fetchExpenses = async () => {
+      try {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        
+        const { data: expenses, error } = await supabase
+          .from('expenses')
+          .select('*');
+          
+        if (error) {
+          console.error("Error fetching expenses:", error);
+          toast({
+            title: "Error fetching expenses",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          // Convert to Expense type with proper date objects
+          const formattedExpenses: Expense[] = expenses.map(exp => ({
+            id: exp.id,
+            amount: exp.amount,
+            date: new Date(exp.date),
+            category: exp.category as any,
+            paidBy: exp.paid_by as Profile,
+            notes: exp.notes || undefined
+          }));
+          
+          dispatch({ type: 'SET_EXPENSES', payload: formattedExpenses });
+        }
+      } catch (error) {
+        console.error("Failed to fetch expenses:", error);
+      }
+    };
+    
+    const fetchGoals = async () => {
+      try {
+        const { data: goals, error } = await supabase
+          .from('goals')
+          .select('*');
+          
+        if (error) {
+          console.error("Error fetching goals:", error);
+          toast({
+            title: "Error fetching goals",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          // Convert to Goal type with proper date objects
+          const formattedGoals: Goal[] = goals.map(goal => ({
+            id: goal.id,
+            name: goal.name,
+            targetAmount: goal.target_amount,
+            savedAmount: goal.saved_amount,
+            deadline: new Date(goal.deadline),
+            priority: goal.priority as any
+          }));
+          
+          dispatch({ type: 'SET_GOALS', payload: formattedGoals });
+        }
+      } catch (error) {
+        console.error("Failed to fetch goals:", error);
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+    };
+    
+    // Fetch data
+    fetchExpenses();
+    fetchGoals();
+    
+    // Set up real-time subscription for expenses
+    const expensesSubscription = supabase
+      .channel('expenses-channel')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'expenses' }, 
+        async () => {
+          // Refetch expenses on any change
+          const { data, error } = await supabase.from('expenses').select('*');
+          if (!error && data) {
+            const formattedExpenses: Expense[] = data.map(exp => ({
+              id: exp.id,
+              amount: exp.amount,
+              date: new Date(exp.date),
+              category: exp.category as any,
+              paidBy: exp.paid_by as Profile,
+              notes: exp.notes || undefined
+            }));
+            
+            dispatch({ type: 'SET_EXPENSES', payload: formattedExpenses });
+          }
+        }
+      )
+      .subscribe();
+      
+    // Set up real-time subscription for goals
+    const goalsSubscription = supabase
+      .channel('goals-channel')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'goals' }, 
+        async () => {
+          // Refetch goals on any change
+          const { data, error } = await supabase.from('goals').select('*');
+          if (!error && data) {
+            const formattedGoals: Goal[] = data.map(goal => ({
+              id: goal.id,
+              name: goal.name,
+              targetAmount: goal.target_amount,
+              savedAmount: goal.saved_amount,
+              deadline: new Date(goal.deadline),
+              priority: goal.priority as any
+            }));
+            
+            dispatch({ type: 'SET_GOALS', payload: formattedGoals });
+          }
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      // Clean up subscriptions
+      supabase.removeChannel(expensesSubscription);
+      supabase.removeChannel(goalsSubscription);
+    };
+  }, []);
 
   return (
     <FinanceContext.Provider value={{ state, dispatch }}>

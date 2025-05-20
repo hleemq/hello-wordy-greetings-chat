@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useFinance } from '@/context/FinanceContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -7,16 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HelpCircle, Edit, Trash2, PlusCircle } from 'lucide-react';
+import { HelpCircle, Edit, Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import AddGoalForm from './AddGoalForm';
 import EditGoalForm from './EditGoalForm';
 import { Goal } from '@/types/finance';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 const GoalsPage = () => {
   const { state, dispatch } = useFinance();
   const { t } = useLanguage();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   const priorityMatrix = {
     "Important-Urgent": { 
@@ -45,8 +47,33 @@ const GoalsPage = () => {
     }
   };
 
-  const deleteGoal = (id: string) => {
-    dispatch({ type: 'DELETE_GOAL', payload: id });
+  const deleteGoal = async (id: string) => {
+    try {
+      setDeletingId(id);
+      const { error } = await supabase
+        .from('goals')
+        .delete()
+        .eq('id', id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      dispatch({ type: 'DELETE_GOAL', payload: id });
+      toast({
+        title: t('goalDeleted'),
+        description: t('goalDeletedDescription')
+      });
+    } catch (error: any) {
+      console.error('Error deleting goal:', error);
+      toast({
+        title: t('errorDeletingGoal'),
+        description: error.message || t('anErrorOccurred'),
+        variant: "destructive"
+      });
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const handleEditButtonClick = (goal: Goal) => {
@@ -73,6 +100,17 @@ const GoalsPage = () => {
   const sortedPriorities = Object.keys(goalsByPriority).sort(
     (a, b) => priorityOrder[a as keyof typeof priorityOrder] - priorityOrder[b as keyof typeof priorityOrder]
   );
+
+  if (state.loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-gray-500">{t('loadingGoals')}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -187,8 +225,13 @@ const GoalsPage = () => {
                                   variant="ghost" 
                                   size="icon"
                                   onClick={() => deleteGoal(goal.id)}
+                                  disabled={deletingId === goal.id}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  {deletingId === goal.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>

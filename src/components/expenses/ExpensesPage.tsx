@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useFinance } from '@/context/FinanceContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -7,9 +6,11 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HelpCircle, Trash2 } from 'lucide-react';
+import { HelpCircle, Trash2, Loader2 } from 'lucide-react';
 import { Expense, ExpenseCategory } from '@/types/finance';
 import AddExpenseForm from './AddExpenseForm';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 const ExpensesPage = () => {
   const { state, dispatch } = useFinance();
@@ -17,6 +18,7 @@ const ExpensesPage = () => {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<number>(new Date().getMonth());
   const [filterYear, setFilterYear] = useState<number>(new Date().getFullYear());
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const categories: ExpenseCategory[] = [
     "Rent", "Utilities", "Groceries", "Dining", "Transportation", 
@@ -72,14 +74,50 @@ const ExpensesPage = () => {
     .filter(expense => expense.paidBy === 'Achraf')
     .reduce((sum, expense) => sum + expense.amount, 0);
   
-  const deleteExpense = (id: string) => {
-    dispatch({ type: 'DELETE_EXPENSE', payload: id });
+  const deleteExpense = async (id: string) => {
+    try {
+      setDeletingId(id);
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      dispatch({ type: 'DELETE_EXPENSE', payload: id });
+      toast({
+        title: t('expenseDeleted'),
+        description: t('expenseDeletedDescription')
+      });
+    } catch (error: any) {
+      console.error('Error deleting expense:', error);
+      toast({
+        title: t('errorDeletingExpense'),
+        description: error.message || t('anErrorOccurred'),
+        variant: "destructive"
+      });
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   // Update document direction based on language
   React.useEffect(() => {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
+
+  if (state.loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-gray-500">{t('loadingExpenses')}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -246,8 +284,13 @@ const ExpensesPage = () => {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => deleteExpense(expense.id)}
+                                disabled={deletingId === expense.id}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                {deletingId === expense.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>

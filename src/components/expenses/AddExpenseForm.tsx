@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { HelpCircle } from 'lucide-react';
 import { ExpenseCategory } from '@/types/finance';
 import { toast } from '@/components/ui/use-toast';
-import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '@/integrations/supabase/client';
 
 // Use this function to format date to YYYY-MM-DD for the date input
 const formatDateForInput = (date: Date): string => {
@@ -28,14 +28,16 @@ const AddExpenseForm = () => {
   const [category, setCategory] = useState<ExpenseCategory>('Groceries');
   const [date, setDate] = useState(formatDateForInput(new Date()));
   const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const categories: ExpenseCategory[] = [
     "Rent", "Utilities", "Groceries", "Dining", "Transportation", 
     "Entertainment", "Health", "Shopping", "Other"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
     const amountValue = parseFloat(amount);
     if (isNaN(amountValue) || amountValue <= 0) {
@@ -44,30 +46,63 @@ const AddExpenseForm = () => {
         description: "Please enter a valid positive number",
         variant: "destructive"
       });
+      setLoading(false);
       return;
     }
     
-    const expense = {
-      id: uuidv4(),
-      amount: amountValue,
-      category,
-      date: new Date(date),
-      paidBy: state.activeProfile,
-      notes
-    };
-    
-    dispatch({ type: 'ADD_EXPENSE', payload: expense });
-    
-    // Reset form
-    setAmount('');
-    setCategory('Groceries');
-    setDate(formatDateForInput(new Date()));
-    setNotes('');
-    
-    toast({
-      title: "Expense added",
-      description: `${amountValue.toFixed(2)} MAD for ${t(category.toLowerCase())} has been added.`
-    });
+    try {
+      // Create expense object for database
+      const expenseData = {
+        amount: amountValue,
+        category,
+        date: new Date(date),
+        paid_by: state.activeProfile,
+        notes
+      };
+      
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('expenses')
+        .insert(expenseData)
+        .select()
+        .single();
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Add to local state
+      const newExpense = {
+        id: data.id,
+        amount: amountValue,
+        category,
+        date: new Date(date),
+        paidBy: state.activeProfile,
+        notes
+      };
+      
+      dispatch({ type: 'ADD_EXPENSE', payload: newExpense });
+      
+      // Reset form
+      setAmount('');
+      setCategory('Groceries');
+      setDate(formatDateForInput(new Date()));
+      setNotes('');
+      
+      toast({
+        title: "Expense added",
+        description: `${amountValue.toFixed(2)} MAD for ${t(category.toLowerCase())} has been added.`
+      });
+    } catch (error: any) {
+      console.error('Error adding expense:', error);
+      toast({
+        title: "Error adding expense",
+        description: error.message || "An error occurred while adding the expense.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -159,7 +194,9 @@ const AddExpenseForm = () => {
         />
       </div>
       
-      <Button type="submit" className="w-full">{t('addExpense')}</Button>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? 'Adding...' : t('addExpense')}
+      </Button>
     </form>
   );
 };
