@@ -22,22 +22,26 @@ const GoalsPage = () => {
     "Important-Urgent": { 
       label: t('importantUrgent'), 
       color: "bg-red-100 text-red-800", 
-      borderColor: "border-red-200" 
+      borderColor: "border-red-200",
+      explanation: t('importantUrgentExplanation')
     },
     "Important-NotUrgent": { 
       label: t('importantNotUrgent'), 
       color: "bg-blue-100 text-blue-800", 
-      borderColor: "border-blue-200" 
+      borderColor: "border-blue-200",
+      explanation: t('importantNotUrgentExplanation')
     },
     "NotImportant-Urgent": { 
       label: t('urgentNotImportant'), 
       color: "bg-yellow-100 text-yellow-800", 
-      borderColor: "border-yellow-200" 
+      borderColor: "border-yellow-200",
+      explanation: t('urgentNotImportantExplanation')
     },
     "NotImportant-NotUrgent": { 
       label: t('notImportantOrUrgent'), 
       color: "bg-gray-100 text-gray-800", 
-      borderColor: "border-gray-200" 
+      borderColor: "border-gray-200",
+      explanation: t('notImportantOrUrgentExplanation')
     }
   };
 
@@ -102,7 +106,7 @@ const GoalsPage = () => {
           <Card className="mb-8">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>{t('priority')}</CardTitle>
+                <CardTitle>{t('priorityMatrixExplanation')}</CardTitle>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -111,30 +115,21 @@ const GoalsPage = () => {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-sm">
-                      <p>{t('goalProgressTooltip')}</p>
+                      <p>{t('priorityHelpTooltip')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
+              <CardDescription>{t('trackSavingsGoals')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className={`p-4 rounded-md ${priorityMatrix["Important-Urgent"].color} border ${priorityMatrix["Important-Urgent"].borderColor}`}>
-                  <h3 className="font-medium mb-1">{t('importantUrgent')}</h3>
-                  <p className="text-sm">{t('trackSavingsGoals')}</p>
-                </div>
-                <div className={`p-4 rounded-md ${priorityMatrix["Important-NotUrgent"].color} border ${priorityMatrix["Important-NotUrgent"].borderColor}`}>
-                  <h3 className="font-medium mb-1">{t('importantNotUrgent')}</h3>
-                  <p className="text-sm">{t('trackSavingsGoals')}</p>
-                </div>
-                <div className={`p-4 rounded-md ${priorityMatrix["NotImportant-Urgent"].color} border ${priorityMatrix["NotImportant-Urgent"].borderColor}`}>
-                  <h3 className="font-medium mb-1">{t('urgentNotImportant')}</h3>
-                  <p className="text-sm">{t('trackSavingsGoals')}</p>
-                </div>
-                <div className={`p-4 rounded-md ${priorityMatrix["NotImportant-NotUrgent"].color} border ${priorityMatrix["NotImportant-NotUrgent"].borderColor}`}>
-                  <h3 className="font-medium mb-1">{t('notImportantOrUrgent')}</h3>
-                  <p className="text-sm">{t('trackSavingsGoals')}</p>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {Object.entries(priorityMatrix).map(([key, value]) => (
+                  <div key={key} className={`p-4 rounded-md ${value.color} border ${value.borderColor}`}>
+                    <h3 className="font-medium mb-1">{value.label}</h3>
+                    <p className="text-sm">{value.explanation}</p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -205,7 +200,7 @@ const GoalsPage = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
-                          <div className="flex justify-between">
+                          <div className="flex justify-between flex-wrap gap-2">
                             <div>
                               <div className="text-sm text-gray-500">{t('goalProgress')}</div>
                               <div className="text-lg font-semibold">{progress}%</div>
@@ -220,7 +215,7 @@ const GoalsPage = () => {
                           
                           <Progress value={progress} className="h-2" />
                           
-                          <div className="flex justify-between text-sm pt-1">
+                          <div className="flex justify-between text-sm pt-1 flex-wrap gap-2">
                             <div className="text-gray-500">{monthsLeft} {t('monthsRemaining')}</div>
                             <div className="font-medium">
                               {t('saveAction')} {monthlySavingsNeeded.toFixed(2)} MAD/{t('monthLabel')}

@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 type LanguageType = 'en' | 'ar';
@@ -87,6 +86,14 @@ const translations = {
     'monthsRemaining': 'months left',
     'noSavingsGoals': 'No savings goals added yet',
     'quickAddExpense': 'Quick Add Expense',
+    'priorityMatrixExplanation': 'Priority Matrix Explanation',
+    'priorityHelpTooltip': 'Learn how to prioritize your saving goals effectively',
+    
+    // Priority explanations
+    'importantUrgentExplanation': 'Needs immediate attention. These goals are crucial and time-sensitive, like emergency funds or important pending deadlines.',
+    'importantNotUrgentExplanation': 'Plan for these. Important for long-term success but not time-pressured, like retirement savings or education funds.',
+    'urgentNotImportantExplanation': 'Delegate if possible. Time-sensitive but less important goals that might be nice to achieve soon.',
+    'notImportantOrUrgentExplanation': 'Consider these last. Goals that are neither crucial nor time-sensitive, like luxury purchases or optional upgrades.',
     
     // Dashboard specific
     'balanceSummary': 'Balance Summary',
@@ -185,6 +192,14 @@ const translations = {
     'monthsRemaining': 'شهر متبقي',
     'noSavingsGoals': 'لم تتم إضافة أهداف توفير بعد',
     'quickAddExpense': 'إضافة مصروف سريع',
+    'priorityMatrixExplanation': 'شرح مصفوفة الأولويات',
+    'priorityHelpTooltip': 'تعلم كيفية تحديد أولويات أهداف التوفير الخاصة بك بشكل فعال',
+    
+    // Priority explanations
+    'importantUrgentExplanation': 'تحتاج إلى اهتمام فوري. هذه الأهداف حاسمة وحساسة للوقت، مثل صناديق الطوارئ أو المواعيد النهائية المعلقة المهمة.',
+    'importantNotUrgentExplanation': 'خطط لهذه الأهداف. مهمة للنجاح على المدى الطويل ولكنها ليست تحت ضغط الوقت، مثل مدخرات التقاعد أو صناديق التعليم.',
+    'urgentNotImportantExplanation': 'فوض إذا أمكن. أهداف حساسة للوقت ولكنها أقل أهمية قد يكون من الجيد تحقيقها قريبًا.',
+    'notImportantOrUrgentExplanation': 'ضع هذه في الاعتبار في النهاية. الأهداف التي ليست حاسمة أو حساسة للوقت، مثل المشتريات الفاخرة أو الترقيات الاختيارية.',
     
     // Dashboard specific
     'balanceSummary': 'ملخص الرصيد',
