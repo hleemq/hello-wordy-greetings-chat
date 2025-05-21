@@ -9,6 +9,7 @@ import ExpensesPage from '../expenses/ExpensesPage';
 import GoalsPage from '../goals/GoalsPage';
 import ReportsPage from '../reports/ReportsPage';
 import LoginScreen from '../auth/LoginScreen';
+import InstallPrompt from '../pwa/InstallPrompt';
 
 const Layout = () => {
   const { state } = useFinance();
@@ -35,6 +36,7 @@ const Layout = () => {
             {currentView === 'goals' && <GoalsPage />}
             {currentView === 'reports' && <ReportsPage />}
           </main>
+          <InstallPrompt />
         </div>
       </LanguageProvider>
     </ThemeProvider>

@@ -8,3 +8,71 @@
   padding: 0;
   text-align: left;
 }
+
+/* PWA-specific styles */
+.we-logo-container {
+  background-color: #000000;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 52px;
+}
+
+.we-logo {
+  font-family: 'Franklin Gothic Heavy', 'Montserrat Black', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.875rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: #FEFE00;
+  text-shadow: 0 0 8px rgba(254, 254, 0, 0.3);
+}
+
+.we-tagline {
+  font-family: 'Franklin Gothic Medium', 'Montserrat', sans-serif;
+  font-style: italic;
+  font-size: 0.75rem;
+  color: #F4F499;
+}
+
+/* PWA installation banner */
+.pwa-install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #000000;
+  color: #F5F5F5;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* PWA splash screen animation */
+@keyframes pwa-splash-fade {
+  0% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.pwa-splash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #000000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: pwa-splash-fade 2s forwards;
+}
