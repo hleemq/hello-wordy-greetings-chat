@@ -21,15 +21,15 @@ const LoginScreen = () => {
     }
   };
   return <div className="min-h-screen flex items-center justify-center bg-neutral-100">
-      <div className="w-full max-w-md p-8 space-y-8 shadow-md bg-[#f4f499] rounded-xl">
+      <div className="w-full max-w-md p-8 space-y-8 shadow-md rounded-3xl bg-slate-950">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-[#fefe00]">WE</h1>
-          <p className="mt-2 text-slate-950 text-sm">Grow Together</p>
+          <h1 className="text-3xl text-[#fefe00] font-extrabold text-center">WE</h1>
+          <p className="mt-2 text-base text-zinc-100">Grow Together</p>
         </div>
 
         <div className="space-y-6">
           <div>
-            <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
+            <label className="flex items-center text-sm font-medium text-gray-700 mb-1 rounded-none bg-slate-950">
               Enter PIN 
               <TooltipProvider>
                 <Tooltip>
