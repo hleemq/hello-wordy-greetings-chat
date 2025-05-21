@@ -2,6 +2,7 @@
 import React from 'react';
 import { useFinance } from '@/context/FinanceContext';
 import { LanguageProvider } from '@/context/LanguageContext';
+import { ThemeProvider } from '@/hooks/use-theme';
 import Navigation from './Navigation';
 import Dashboard from '../dashboard/Dashboard';
 import ExpensesPage from '../expenses/ExpensesPage';
@@ -15,24 +16,28 @@ const Layout = () => {
 
   if (!isLoggedIn) {
     return (
-      <LanguageProvider>
-        <LoginScreen />
-      </LanguageProvider>
+      <ThemeProvider defaultTheme="light">
+        <LanguageProvider>
+          <LoginScreen />
+        </LanguageProvider>
+      </ThemeProvider>
     );
   }
 
   return (
-    <LanguageProvider>
-      <div className="min-h-screen bg-gray-50" dir={window.document.documentElement.dir}>
-        <Navigation />
-        <main>
-          {currentView === 'dashboard' && <Dashboard />}
-          {currentView === 'expenses' && <ExpensesPage />}
-          {currentView === 'goals' && <GoalsPage />}
-          {currentView === 'reports' && <ReportsPage />}
-        </main>
-      </div>
-    </LanguageProvider>
+    <ThemeProvider defaultTheme="light">
+      <LanguageProvider>
+        <div className="min-h-screen bg-cloud dark:bg-[#121212]" dir={window.document.documentElement.dir}>
+          <Navigation />
+          <main>
+            {currentView === 'dashboard' && <Dashboard />}
+            {currentView === 'expenses' && <ExpensesPage />}
+            {currentView === 'goals' && <GoalsPage />}
+            {currentView === 'reports' && <ReportsPage />}
+          </main>
+        </div>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 };
 

@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -24,6 +25,13 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				midnight: 'hsl(var(--midnight))',
+				sunshine: 'hsl(var(--sunshine))',
+				mindaro: 'hsl(var(--mindaro))',
+				cloud: 'hsl(var(--cloud))',
+				success: 'hsl(var(--success))',
+				warning: 'hsl(var(--warning))',
+				error: 'hsl(var(--error))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -68,6 +76,14 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			boxShadow: {
+				'card': '0 2px 4px rgba(0,0,0,0.05)',
+			},
+			fontFamily: {
+				'franklin-heavy': ['Franklin Gothic Heavy', 'Montserrat Black', 'sans-serif'],
+				'franklin-medium': ['Franklin Gothic Medium', 'Montserrat SemiBold', 'sans-serif'], 
+				'franklin-book': ['Franklin Gothic Book', 'Montserrat', 'sans-serif'],
+			},
 			keyframes: {
 				'accordion-down': {
 					from: {
@@ -84,11 +100,16 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'confetti': {
+					'0%': { transform: 'translateY(0) rotate(0)', opacity: '1' },
+					'100%': { transform: 'translateY(-500px) rotate(720deg)', opacity: '0' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'confetti': 'confetti 2s ease-out forwards',
 			}
 		}
 	},
