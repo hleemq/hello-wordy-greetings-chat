@@ -51,11 +51,11 @@ const AddExpenseForm = () => {
     }
     
     try {
-      // Create expense object for database
+      // Create expense object for database - with date as ISO string
       const expenseData = {
         amount: amountValue,
         category,
-        date: new Date(date),
+        date: new Date(date).toISOString(),
         paid_by: state.activeProfile,
         notes
       };
@@ -76,7 +76,7 @@ const AddExpenseForm = () => {
         id: data.id,
         amount: amountValue,
         category,
-        date: new Date(date),
+        date: new Date(data.date),
         paidBy: state.activeProfile,
         notes
       };

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { Expense, Goal, Profile, Balance } from '@/types/finance';
 import { supabase } from "@/integrations/supabase/client";
@@ -201,8 +200,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     fetchGoals();
     
     // Set up real-time subscription for expenses
-    const expensesSubscription = supabase
-      .channel('expenses-channel')
+    const expensesChannel = supabase
+      .channel('expenses-changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'expenses' }, 
         async () => {
@@ -225,8 +224,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       .subscribe();
       
     // Set up real-time subscription for goals
-    const goalsSubscription = supabase
-      .channel('goals-channel')
+    const goalsChannel = supabase
+      .channel('goals-changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'goals' }, 
         async () => {
@@ -250,8 +249,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     return () => {
       // Clean up subscriptions
-      supabase.removeChannel(expensesSubscription);
-      supabase.removeChannel(goalsSubscription);
+      supabase.removeChannel(expensesChannel);
+      supabase.removeChannel(goalsChannel);
     };
   }, []);
 

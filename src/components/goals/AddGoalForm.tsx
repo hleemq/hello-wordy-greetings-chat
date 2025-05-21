@@ -78,12 +78,12 @@ const AddGoalForm: React.FC<AddGoalFormProps> = ({ onSuccess }) => {
     }
     
     try {
-      // Create goal object for database
+      // Create goal object for database - with deadline as ISO string
       const goalData = {
         name,
         target_amount: targetAmountValue,
         saved_amount: savedAmountValue,
-        deadline: new Date(deadline),
+        deadline: new Date(deadline).toISOString(),
         priority
       };
       
@@ -104,7 +104,7 @@ const AddGoalForm: React.FC<AddGoalFormProps> = ({ onSuccess }) => {
         name,
         targetAmount: targetAmountValue,
         savedAmount: savedAmountValue,
-        deadline: new Date(deadline),
+        deadline: new Date(data.deadline),
         priority
       };
       
