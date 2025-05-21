@@ -127,130 +127,88 @@ const FinanceContext = createContext<{
 export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Fetch expenses from Supabase when component mounts
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      try {
-        dispatch({ type: 'SET_LOADING', payload: true });
+  // Function to fetch expenses
+  const fetchExpenses = async () => {
+    try {
+      const { data: expenses, error } = await supabase
+        .from('expenses')
+        .select('*');
         
-        const { data: expenses, error } = await supabase
-          .from('expenses')
-          .select('*');
-          
-        if (error) {
-          console.error("Error fetching expenses:", error);
-          toast({
-            title: "Error fetching expenses",
-            description: error.message,
-            variant: "destructive"
-          });
-        } else {
-          // Convert to Expense type with proper date objects
-          const formattedExpenses: Expense[] = expenses.map(exp => ({
-            id: exp.id,
-            amount: exp.amount,
-            date: new Date(exp.date),
-            category: exp.category as any,
-            paidBy: exp.paid_by as Profile,
-            notes: exp.notes || undefined
-          }));
-          
-          dispatch({ type: 'SET_EXPENSES', payload: formattedExpenses });
-        }
-      } catch (error) {
-        console.error("Failed to fetch expenses:", error);
+      if (error) {
+        console.error("Error fetching expenses:", error);
+        toast({
+          title: "Error fetching expenses",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        // Convert to Expense type with proper date objects
+        const formattedExpenses: Expense[] = expenses.map(exp => ({
+          id: exp.id,
+          amount: exp.amount,
+          date: new Date(exp.date),
+          category: exp.category as any,
+          paidBy: exp.paid_by as Profile,
+          notes: exp.notes || undefined
+        }));
+        
+        dispatch({ type: 'SET_EXPENSES', payload: formattedExpenses });
       }
-    };
-    
-    const fetchGoals = async () => {
-      try {
-        const { data: goals, error } = await supabase
-          .from('goals')
-          .select('*');
-          
-        if (error) {
-          console.error("Error fetching goals:", error);
-          toast({
-            title: "Error fetching goals",
-            description: error.message,
-            variant: "destructive"
-          });
-        } else {
-          // Convert to Goal type with proper date objects
-          const formattedGoals: Goal[] = goals.map(goal => ({
-            id: goal.id,
-            name: goal.name,
-            targetAmount: goal.target_amount,
-            savedAmount: goal.saved_amount,
-            deadline: new Date(goal.deadline),
-            priority: goal.priority as any
-          }));
-          
-          dispatch({ type: 'SET_GOALS', payload: formattedGoals });
-        }
-      } catch (error) {
-        console.error("Failed to fetch goals:", error);
-      } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      console.error("Failed to fetch expenses:", error);
+    }
+  };
+  
+  // Function to fetch goals
+  const fetchGoals = async () => {
+    try {
+      const { data: goals, error } = await supabase
+        .from('goals')
+        .select('*');
+        
+      if (error) {
+        console.error("Error fetching goals:", error);
+        toast({
+          title: "Error fetching goals",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        // Convert to Goal type with proper date objects
+        const formattedGoals: Goal[] = goals.map(goal => ({
+          id: goal.id,
+          name: goal.name,
+          targetAmount: goal.target_amount,
+          savedAmount: goal.saved_amount,
+          deadline: new Date(goal.deadline),
+          priority: goal.priority as any
+        }));
+        
+        dispatch({ type: 'SET_GOALS', payload: formattedGoals });
       }
-    };
-    
-    // Fetch data
+    } catch (error) {
+      console.error("Failed to fetch goals:", error);
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  // Fetch initial data and set up polling
+  useEffect(() => {
+    // Initial data fetch
+    dispatch({ type: 'SET_LOADING', payload: true });
     fetchExpenses();
     fetchGoals();
     
-    // Set up real-time subscription for expenses
-    const expensesChannel = supabase
-      .channel('expenses-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'expenses' }, 
-        async () => {
-          // Refetch expenses on any change
-          const { data, error } = await supabase.from('expenses').select('*');
-          if (!error && data) {
-            const formattedExpenses: Expense[] = data.map(exp => ({
-              id: exp.id,
-              amount: exp.amount,
-              date: new Date(exp.date),
-              category: exp.category as any,
-              paidBy: exp.paid_by as Profile,
-              notes: exp.notes || undefined
-            }));
-            
-            dispatch({ type: 'SET_EXPENSES', payload: formattedExpenses });
-          }
-        }
-      )
-      .subscribe();
-      
-    // Set up real-time subscription for goals
-    const goalsChannel = supabase
-      .channel('goals-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'goals' }, 
-        async () => {
-          // Refetch goals on any change
-          const { data, error } = await supabase.from('goals').select('*');
-          if (!error && data) {
-            const formattedGoals: Goal[] = data.map(goal => ({
-              id: goal.id,
-              name: goal.name,
-              targetAmount: goal.target_amount,
-              savedAmount: goal.saved_amount,
-              deadline: new Date(goal.deadline),
-              priority: goal.priority as any
-            }));
-            
-            dispatch({ type: 'SET_GOALS', payload: formattedGoals });
-          }
-        }
-      )
-      .subscribe();
+    // Set up polling for data updates every 5 seconds
+    const pollingInterval = setInterval(() => {
+      fetchExpenses();
+      fetchGoals();
+    }, 5000);
     
     return () => {
-      // Clean up subscriptions
-      supabase.removeChannel(expensesChannel);
-      supabase.removeChannel(goalsChannel);
+      // Clean up polling interval
+      clearInterval(pollingInterval);
     };
   }, []);
 
