@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from '@/components/ui/use-toast';
 import { Goal, GoalPriority } from '@/types/finance';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EditGoalFormProps {
   goal: Goal;
@@ -31,6 +32,7 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
   const [savedAmount, setSavedAmount] = useState(goal.savedAmount.toString());
   const [deadline, setDeadline] = useState(formatDateForInput(new Date(goal.deadline)));
   const [priority, setPriority] = useState<GoalPriority>(goal.priority);
+  const [loading, setLoading] = useState(false);
 
   // Update form if goal changes
   useEffect(() => {
@@ -41,8 +43,9 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
     setPriority(goal.priority);
   }, [goal]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
     const targetAmountValue = parseFloat(targetAmount);
     const savedAmountValue = parseFloat(savedAmount);
@@ -53,6 +56,7 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
         description: t('enterValidAmount'),
         variant: "destructive"
       });
+      setLoading(false);
       return;
     }
     
@@ -62,6 +66,7 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
         description: t('enterValidNonNegative'),
         variant: "destructive"
       });
+      setLoading(false);
       return;
     }
     
@@ -71,27 +76,59 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
         description: t('savedGreaterThanTarget'),
         variant: "destructive"
       });
+      setLoading(false);
       return;
     }
     
-    const updatedGoal: Goal = {
-      ...goal,
-      name,
-      targetAmount: targetAmountValue,
-      savedAmount: savedAmountValue,
-      deadline: new Date(deadline),
-      priority
-    };
-    
-    dispatch({ type: 'UPDATE_GOAL', payload: updatedGoal });
-    
-    toast({
-      title: t('goalUpdated'),
-      description: `${t('changesTo')} "${name}" ${t('saved')}.`
-    });
-    
-    if (onSuccess) {
-      onSuccess();
+    try {
+      // Create goal object for database - with deadline as ISO string
+      const goalData = {
+        name,
+        target_amount: targetAmountValue,
+        saved_amount: savedAmountValue,
+        deadline: new Date(deadline).toISOString(),
+        priority
+      };
+      
+      // Update in Supabase
+      const { error } = await supabase
+        .from('goals')
+        .update(goalData)
+        .eq('id', goal.id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update in local state
+      const updatedGoal: Goal = {
+        ...goal,
+        name,
+        targetAmount: targetAmountValue,
+        savedAmount: savedAmountValue,
+        deadline: new Date(deadline),
+        priority
+      };
+      
+      dispatch({ type: 'UPDATE_GOAL', payload: updatedGoal });
+      
+      toast({
+        title: t('goalUpdated'),
+        description: `${t('changesTo')} "${name}" ${t('saved')}.`
+      });
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error: any) {
+      console.error('Error updating goal:', error);
+      toast({
+        title: t('errorUpdatingGoal'),
+        description: error.message || t('anErrorOccurred'),
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -167,8 +204,8 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
         <Button type="button" variant="outline" onClick={onSuccess}>
           {t('cancel')}
         </Button>
-        <Button type="submit">
-          {t('save')}
+        <Button type="submit" disabled={loading}>
+          {loading ? t('saving') : t('save')}
         </Button>
       </div>
     </form>
