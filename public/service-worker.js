@@ -146,14 +146,22 @@ function fetchAndCache(request) {
     });
 }
 
-// Background sync for offline data resilience
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-pending-operations') {
-    event.waitUntil(syncPendingOperations());
+// Handle custom SCHEDULE_SYNC messages as a replacement for SyncManager
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  // Handle our custom sync message
+  if (event.data && event.data.type === 'SCHEDULE_SYNC') {
+    if (event.data.payload && event.data.payload.tag === 'sync-pending-operations') {
+      syncPendingOperations();
+    }
   }
 });
 
-// Handle pending operations when back online
+// Background sync for offline data resilience
+// This is now called via message passing instead of sync event
 async function syncPendingOperations() {
   try {
     // This will be implemented with IndexedDB operations in the app
@@ -170,10 +178,3 @@ async function syncPendingOperations() {
     console.error('Sync failed:', error);
   }
 }
-
-// Listen for messages from clients
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-});

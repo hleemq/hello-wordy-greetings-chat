@@ -119,9 +119,17 @@ export const queueOperation = async (operation: Omit<PendingOperation, 'id' | 't
     await storeData(PENDING_OPERATIONS_STORE, pendingOp);
     
     // Register for sync when online
-    if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    // Using a more TypeScript-friendly approach without direct sync API
+    if ('serviceWorker' in navigator) {
       const registration = await navigator.serviceWorker.ready;
-      await registration.sync.register('sync-pending-operations');
+      
+      // Post a message to the service worker instead of using sync API
+      navigator.serviceWorker.controller?.postMessage({
+        type: 'SCHEDULE_SYNC',
+        payload: {
+          tag: 'sync-pending-operations'
+        }
+      });
     }
   } catch (error) {
     console.error('Error queueing operation:', error);

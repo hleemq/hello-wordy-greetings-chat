@@ -17,8 +17,8 @@ const queryClient = new QueryClient({
       staleTime: 60 * 1000, // 1 minute
       // Enable offline support for queries
       retry: navigator.onLine ? 3 : false,
-      // Default to keep previous data while loading new data
-      keepPreviousData: true,
+      // Using placeholderData instead of keepPreviousData
+      placeholderData: (previousData) => previousData,
     },
   },
 });
