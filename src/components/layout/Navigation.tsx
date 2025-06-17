@@ -1,17 +1,22 @@
 
 import React from 'react';
 import { useFinance } from '@/context/FinanceContext';
+import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { DarkModeToggle } from "@/components/ui/dark-mode-toggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { LogOut, Globe, UserRound } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LogOut, Globe, UserRound, User } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
+import { useNavigate } from 'react-router-dom';
 
 const Navigation = () => {
   const { state, dispatch } = useFinance();
+  const { user, signOut } = useAuth();
   const { currentView, activeProfile } = state;
   const { language, setLanguage, t } = useLanguage();
+  const navigate = useNavigate();
 
   const switchProfile = () => {
     dispatch({ 
@@ -20,8 +25,13 @@ const Navigation = () => {
     });
   };
 
-  const handleLogout = () => {
-    dispatch({ type: 'LOGOUT' });
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/profile');
   };
 
   const toggleLanguage = () => {
@@ -93,6 +103,19 @@ const Navigation = () => {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{t('language')}: {language === 'en' ? 'English' : 'العربية'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={handleProfileClick} className="text-cloud hover:bg-mindaro/10">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Profile Settings</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

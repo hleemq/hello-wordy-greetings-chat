@@ -1,15 +1,13 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Navigation from './Navigation';
 import Dashboard from '@/components/dashboard/Dashboard';
 import ExpensesPage from '@/components/expenses/ExpensesPage';
 import GoalsPage from '@/components/goals/GoalsPage';
 import ReportsPage from '@/components/reports/ReportsPage';
 import { useFinance } from '@/context/FinanceContext';
-import LoginScreen from '@/components/auth/LoginScreen';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import NetworkStatus from './NetworkStatus';
-import { Outlet } from 'react-router-dom';
 import Settings from '@/pages/Settings';
 
 const Layout = () => {
@@ -32,11 +30,6 @@ const Layout = () => {
         return <Dashboard />;
     }
   };
-
-  // Show login screen if not logged in
-  if (!state.isLoggedIn) {
-    return <LoginScreen />;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
