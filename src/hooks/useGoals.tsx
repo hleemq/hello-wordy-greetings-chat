@@ -11,7 +11,7 @@ export interface Goal {
   saved_amount: number;
   deadline: string;
   priority: string;
-  user_id: string;
+  user_id?: string;
   created_at: string;
 }
 

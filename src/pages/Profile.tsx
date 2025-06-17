@@ -42,19 +42,42 @@ const Profile = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Use a raw query to access the profiles table
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+        .rpc('get_profile', { user_id: user.id });
 
-      if (error) throw error;
+      if (error) {
+        // If the function doesn't exist, try direct query (might fail due to types)
+        console.log('RPC failed, trying direct query');
+        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+          headers: {
+            'Authorization': `Bearer ${supabase.supabaseKey}`,
+            'apikey': supabase.supabaseKey,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const profiles = await response.json();
+          if (profiles.length > 0) {
+            const profileData = profiles[0];
+            setProfile(profileData);
+            setFirstName(profileData.first_name || '');
+            setLastName(profileData.last_name || '');
+            setPartnerFirstName(profileData.partner_first_name || '');
+            setPartnerLastName(profileData.partner_last_name || '');
+          }
+        }
+        return;
+      }
 
-      setProfile(data);
-      setFirstName(data.first_name || '');
-      setLastName(data.last_name || '');
-      setPartnerFirstName(data.partner_first_name || '');
-      setPartnerLastName(data.partner_last_name || '');
+      if (data) {
+        setProfile(data);
+        setFirstName(data.first_name || '');
+        setLastName(data.last_name || '');
+        setPartnerFirstName(data.partner_first_name || '');
+        setPartnerLastName(data.partner_last_name || '');
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -72,18 +95,25 @@ const Profile = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({
+      // Use raw fetch for updating profile
+      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'apikey': supabase.supabaseKey,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
           first_name: firstName,
           last_name: lastName,
           partner_first_name: partnerFirstName,
           partner_last_name: partnerLastName,
           updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id);
+        }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to update profile');
 
       toast({
         title: "Success",
@@ -169,12 +199,19 @@ const Profile = () => {
         .from('avatars')
         .getPublicUrl(fileName);
 
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: data.publicUrl })
-        .eq('id', user.id);
+      // Update avatar URL using raw fetch
+      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'apikey': supabase.supabaseKey,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ avatar_url: data.publicUrl }),
+      });
 
-      if (updateError) throw updateError;
+      if (!response.ok) throw new Error('Failed to update avatar');
 
       toast({
         title: "Success",

@@ -11,7 +11,7 @@ export interface Expense {
   date: string;
   paid_by: string;
   notes?: string;
-  user_id: string;
+  user_id?: string;
   created_at: string;
 }
 
