@@ -19,6 +19,9 @@ interface Profile {
   avatar_url: string | null;
 }
 
+const SUPABASE_URL = "https://zrgzjwqaghrtkwrkngcq.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpyZ3pqd3FhZ2hydGt3cmtuZ2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2OTg5ODQsImV4cCI6MjA2MjI3NDk4NH0.GcIGWtIYYBOa2soPXY5bFj9ZJRf1diJI32RUNND5-N4";
+
 const Profile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,41 +45,25 @@ const Profile = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Use a raw query to access the profiles table
-      const { data, error } = await supabase
-        .rpc('get_profile', { user_id: user.id });
-
-      if (error) {
-        // If the function doesn't exist, try direct query (might fail due to types)
-        console.log('RPC failed, trying direct query');
-        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
-          headers: {
-            'Authorization': `Bearer ${supabase.supabaseKey}`,
-            'apikey': supabase.supabaseKey,
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (response.ok) {
-          const profiles = await response.json();
-          if (profiles.length > 0) {
-            const profileData = profiles[0];
-            setProfile(profileData);
-            setFirstName(profileData.first_name || '');
-            setLastName(profileData.last_name || '');
-            setPartnerFirstName(profileData.partner_first_name || '');
-            setPartnerLastName(profileData.partner_last_name || '');
-          }
+      // Use raw fetch to access the profiles table
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'apikey': SUPABASE_KEY,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const profiles = await response.json();
+        if (profiles.length > 0) {
+          const profileData = profiles[0] as Profile;
+          setProfile(profileData);
+          setFirstName(profileData.first_name || '');
+          setLastName(profileData.last_name || '');
+          setPartnerFirstName(profileData.partner_first_name || '');
+          setPartnerLastName(profileData.partner_last_name || '');
         }
-        return;
-      }
-
-      if (data) {
-        setProfile(data);
-        setFirstName(data.first_name || '');
-        setLastName(data.last_name || '');
-        setPartnerFirstName(data.partner_first_name || '');
-        setPartnerLastName(data.partner_last_name || '');
       }
     } catch (error: any) {
       toast({
@@ -96,11 +83,11 @@ const Profile = () => {
       if (!user) return;
 
       // Use raw fetch for updating profile
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
-          'apikey': supabase.supabaseKey,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'apikey': SUPABASE_KEY,
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal',
         },
@@ -200,11 +187,11 @@ const Profile = () => {
         .getPublicUrl(fileName);
 
       // Update avatar URL using raw fetch
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
-          'apikey': supabase.supabaseKey,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'apikey': SUPABASE_KEY,
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal',
         },
@@ -288,24 +275,24 @@ const Profile = () => {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-franklin-heavy">Profile Settings</h1>
+        <h1 className="text-3xl font-franklin-heavy text-midnight dark:text-cloud">Profile Settings</h1>
 
         {/* Avatar Section */}
-        <Card>
+        <Card className="border-mindaro/30 bg-cloud/50 dark:bg-midnight/90">
           <CardHeader>
-            <CardTitle className="font-franklin-heavy">Profile Picture</CardTitle>
+            <CardTitle className="font-franklin-heavy text-midnight dark:text-cloud">Profile Picture</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-4">
               <Avatar className="h-20 w-20">
                 <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="text-lg font-franklin-medium">
+                <AvatarFallback className="text-lg font-franklin-medium bg-mindaro text-midnight">
                   {firstName.charAt(0)}{lastName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <Label htmlFor="avatar-upload" className="cursor-pointer">
-                  <Button variant="outline" className="space-x-2" disabled={uploading}>
+                  <Button variant="outline" className="space-x-2 border-mindaro/50 hover:bg-mindaro/20" disabled={uploading}>
                     <Camera className="h-4 w-4" />
                     <span>{uploading ? 'Uploading...' : 'Change Photo'}</span>
                   </Button>
@@ -323,65 +310,69 @@ const Profile = () => {
         </Card>
 
         {/* Profile Information */}
-        <Card>
+        <Card className="border-mindaro/30 bg-cloud/50 dark:bg-midnight/90">
           <CardHeader>
-            <CardTitle className="font-franklin-heavy">Profile Information</CardTitle>
+            <CardTitle className="font-franklin-heavy text-midnight dark:text-cloud">Profile Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName" className="font-franklin-medium">Your First Name</Label>
+                <Label htmlFor="firstName" className="font-franklin-medium text-midnight dark:text-cloud">Your First Name (Hasnaa)</Label>
                 <Input
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="Your first name"
+                  className="border-mindaro/30 focus:border-sunshine"
                 />
               </div>
               <div>
-                <Label htmlFor="lastName" className="font-franklin-medium">Your Last Name</Label>
+                <Label htmlFor="lastName" className="font-franklin-medium text-midnight dark:text-cloud">Your Last Name</Label>
                 <Input
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Your last name"
+                  className="border-mindaro/30 focus:border-sunshine"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="partnerFirstName" className="font-franklin-medium">Partner's First Name</Label>
+                <Label htmlFor="partnerFirstName" className="font-franklin-medium text-midnight dark:text-cloud">Partner's First Name (Achraf)</Label>
                 <Input
                   id="partnerFirstName"
                   value={partnerFirstName}
                   onChange={(e) => setPartnerFirstName(e.target.value)}
                   placeholder="Partner's first name"
+                  className="border-mindaro/30 focus:border-sunshine"
                 />
               </div>
               <div>
-                <Label htmlFor="partnerLastName" className="font-franklin-medium">Partner's Last Name</Label>
+                <Label htmlFor="partnerLastName" className="font-franklin-medium text-midnight dark:text-cloud">Partner's Last Name</Label>
                 <Input
                   id="partnerLastName"
                   value={partnerLastName}
                   onChange={(e) => setPartnerLastName(e.target.value)}
                   placeholder="Partner's last name"
+                  className="border-mindaro/30 focus:border-sunshine"
                 />
               </div>
             </div>
-            <Button onClick={updateProfile} disabled={updating}>
+            <Button onClick={updateProfile} disabled={updating} className="bg-sunshine hover:bg-sunshine/90 text-midnight">
               {updating ? 'Updating...' : 'Update Profile'}
             </Button>
           </CardContent>
         </Card>
 
         {/* Password Change */}
-        <Card>
+        <Card className="border-mindaro/30 bg-cloud/50 dark:bg-midnight/90">
           <CardHeader>
-            <CardTitle className="font-franklin-heavy">Change Password</CardTitle>
+            <CardTitle className="font-franklin-heavy text-midnight dark:text-cloud">Change Password</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="newPassword" className="font-franklin-medium">New Password</Label>
+              <Label htmlFor="newPassword" className="font-franklin-medium text-midnight dark:text-cloud">New Password</Label>
               <div className="relative">
                 <Input
                   id="newPassword"
@@ -389,13 +380,13 @@ const Profile = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password"
-                  className="pr-10"
+                  className="pr-10 border-mindaro/30 focus:border-sunshine"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-0 top-0 h-full px-3"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-mindaro/20"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -403,29 +394,30 @@ const Profile = () => {
               </div>
             </div>
             <div>
-              <Label htmlFor="confirmPassword" className="font-franklin-medium">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="font-franklin-medium text-midnight dark:text-cloud">Confirm Password</Label>
               <Input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
+                className="border-mindaro/30 focus:border-sunshine"
               />
             </div>
-            <Button onClick={updatePassword} disabled={!newPassword || !confirmPassword}>
+            <Button onClick={updatePassword} disabled={!newPassword || !confirmPassword} className="bg-sunshine hover:bg-sunshine/90 text-midnight">
               Update Password
             </Button>
           </CardContent>
         </Card>
 
         {/* Data Management */}
-        <Card>
+        <Card className="border-mindaro/30 bg-cloud/50 dark:bg-midnight/90">
           <CardHeader>
-            <CardTitle className="font-franklin-heavy">Data Management</CardTitle>
+            <CardTitle className="font-franklin-heavy text-midnight dark:text-cloud">Data Management</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col space-y-2">
-              <Button onClick={exportData} variant="outline" className="space-x-2">
+              <Button onClick={exportData} variant="outline" className="space-x-2 border-mindaro/50 hover:bg-mindaro/20">
                 <Download className="h-4 w-4" />
                 <span>Export Data</span>
               </Button>
@@ -435,7 +427,7 @@ const Profile = () => {
             </div>
             <div className="flex flex-col space-y-2">
               <Label htmlFor="data-import" className="cursor-pointer">
-                <Button variant="outline" className="space-x-2">
+                <Button variant="outline" className="space-x-2 border-mindaro/50 hover:bg-mindaro/20">
                   <Upload className="h-4 w-4" />
                   <span>Import Data</span>
                 </Button>
