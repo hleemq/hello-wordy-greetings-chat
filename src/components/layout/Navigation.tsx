@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useFinance } from '@/context/FinanceContext';
 import { useAuth } from '@/context/AuthContext';
@@ -41,9 +40,9 @@ const Navigation = () => {
   };
 
   // Get the actual names from profile or fallback to default
-  const hasnaaDis playName = profile?.first_name || 'Hasnaa';
+  const hasnaaDisplayName = profile?.first_name || 'Hasnaa';
   const achrafDisplayName = profile?.partner_first_name || 'Achraf';
-  const currentDisplayName = activeProfile === 'Hasnaa' ? hasnaaDis playName : achrafDisplayName;
+  const currentDisplayName = activeProfile === 'Hasnaa' ? hasnaaDisplayName : achrafDisplayName;
 
   const navItems = [
     { id: 'dashboard', label: t('dashboard') },
