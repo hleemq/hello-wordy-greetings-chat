@@ -3,6 +3,7 @@ import React from 'react';
 import { useFinance } from '@/context/FinanceContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useProfile } from '@/hooks/useProfile';
 import { Button } from "@/components/ui/button";
 import { DarkModeToggle } from "@/components/ui/dark-mode-toggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -14,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 const Navigation = () => {
   const { state, dispatch } = useFinance();
   const { user, signOut } = useAuth();
+  const { profile } = useProfile();
   const { currentView, activeProfile } = state;
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
@@ -37,6 +39,11 @@ const Navigation = () => {
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'ar' : 'en');
   };
+
+  // Get the actual names from profile or fallback to default
+  const hasnaaDis playName = profile?.first_name || 'Hasnaa';
+  const achrafDisplayName = profile?.partner_first_name || 'Achraf';
+  const currentDisplayName = activeProfile === 'Hasnaa' ? hasnaaDis playName : achrafDisplayName;
 
   const navItems = [
     { id: 'dashboard', label: t('dashboard') },
@@ -85,7 +92,7 @@ const Navigation = () => {
                     ) : (
                       <UserRound className="h-5 w-5" style={{ color: '#1EAEDB' }} />
                     )}
-                    <span>{t('active')}: {activeProfile}</span>
+                    <span>{t('active')}: {currentDisplayName}</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -110,8 +117,13 @@ const Navigation = () => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={handleProfileClick} className="text-cloud hover:bg-mindaro/10">
-                    <User className="h-5 w-5" />
+                  <Button variant="ghost" size="icon" onClick={handleProfileClick} className="text-cloud hover:bg-mindaro/10 p-0">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile?.avatar_url || ''} />
+                      <AvatarFallback className="text-xs bg-mindaro text-midnight">
+                        {(profile?.first_name?.[0] || 'H')}{(profile?.last_name?.[0] || 'A')}
+                      </AvatarFallback>
+                    </Avatar>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
