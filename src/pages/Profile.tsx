@@ -1,13 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Download, Upload, Eye, EyeOff } from 'lucide-react';
+import { Camera, Download, Upload, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { exportDataToJson, triggerDownload } from '@/utils/offlineStorage';
 
 interface Profile {
@@ -19,10 +21,9 @@ interface Profile {
   avatar_url: string | null;
 }
 
-const SUPABASE_URL = "https://zrgzjwqaghrtkwrkngcq.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpyZ3pqd3FhZ2hydGt3cmtuZ2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2OTg5ODQsImV4cCI6MjA2MjI3NDk4NH0.GcIGWtIYYBOa2soPXY5bFj9ZJRf1diJI32RUNND5-N4";
-
 const Profile = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -38,34 +39,47 @@ const Profile = () => {
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [user]);
 
   const fetchProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    if (!user) return;
 
-      // Use raw fetch to access the profiles table
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'apikey': SUPABASE_KEY,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const profiles = await response.json();
-        if (profiles.length > 0) {
-          const profileData = profiles[0] as Profile;
-          setProfile(profileData);
-          setFirstName(profileData.first_name || '');
-          setLastName(profileData.last_name || '');
-          setPartnerFirstName(profileData.partner_first_name || '');
-          setPartnerLastName(profileData.partner_last_name || '');
-        }
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (data) {
+        setProfile(data);
+        setFirstName(data.first_name || '');
+        setLastName(data.last_name || '');
+        setPartnerFirstName(data.partner_first_name || '');
+        setPartnerLastName(data.partner_last_name || '');
+      } else {
+        // Create profile if it doesn't exist
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: user.id,
+            first_name: '',
+            last_name: '',
+            partner_first_name: '',
+            partner_last_name: '',
+          }])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        setProfile(newProfile);
       }
     } catch (error: any) {
+      console.error('Error fetching profile:', error);
       toast({
         title: "Error",
         description: "Failed to load profile",
@@ -77,30 +91,22 @@ const Profile = () => {
   };
 
   const updateProfile = async () => {
+    if (!user) return;
+
     setUpdating(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Use raw fetch for updating profile
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'apikey': SUPABASE_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({
+      const { error } = await supabase
+        .from('profiles')
+        .update({
           first_name: firstName,
           last_name: lastName,
           partner_first_name: partnerFirstName,
           partner_last_name: partnerLastName,
           updated_at: new Date().toISOString(),
-        }),
-      });
+        })
+        .eq('id', user.id);
 
-      if (!response.ok) throw new Error('Failed to update profile');
+      if (error) throw error;
 
       toast({
         title: "Success",
@@ -109,6 +115,7 @@ const Profile = () => {
 
       fetchProfile();
     } catch (error: any) {
+      console.error('Error updating profile:', error);
       toast({
         title: "Error",
         description: error.message,
@@ -153,6 +160,7 @@ const Profile = () => {
       setNewPassword('');
       setConfirmPassword('');
     } catch (error: any) {
+      console.error('Error updating password:', error);
       toast({
         title: "Error",
         description: error.message,
@@ -170,7 +178,6 @@ const Profile = () => {
       }
 
       const file = event.target.files[0];
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const fileExt = file.name.split('.').pop();
@@ -186,19 +193,12 @@ const Profile = () => {
         .from('avatars')
         .getPublicUrl(fileName);
 
-      // Update avatar URL using raw fetch
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'apikey': SUPABASE_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({ avatar_url: data.publicUrl }),
-      });
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: data.publicUrl })
+        .eq('id', user.id);
 
-      if (!response.ok) throw new Error('Failed to update avatar');
+      if (updateError) throw updateError;
 
       toast({
         title: "Success",
@@ -207,6 +207,7 @@ const Profile = () => {
 
       fetchProfile();
     } catch (error: any) {
+      console.error('Error uploading avatar:', error);
       toast({
         title: "Error",
         description: error.message,
@@ -228,6 +229,7 @@ const Profile = () => {
         description: "Data exported successfully",
       });
     } catch (error: any) {
+      console.error('Error exporting data:', error);
       toast({
         title: "Error",
         description: "Failed to export data",
@@ -251,6 +253,7 @@ const Profile = () => {
 
       console.log('Imported data:', data);
     } catch (error: any) {
+      console.error('Error importing data:', error);
       toast({
         title: "Error",
         description: "Failed to import data. Please check the file format.",
@@ -275,7 +278,17 @@ const Profile = () => {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-franklin-heavy text-midnight dark:text-cloud">Profile Settings</h1>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/')}
+            className="text-midnight dark:text-cloud hover:bg-mindaro/20"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-3xl font-franklin-heavy text-midnight dark:text-cloud">Profile Settings</h1>
+        </div>
 
         {/* Avatar Section */}
         <Card className="border-mindaro/30 bg-cloud/50 dark:bg-midnight/90">

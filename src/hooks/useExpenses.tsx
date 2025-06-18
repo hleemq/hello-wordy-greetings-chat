@@ -11,7 +11,7 @@ export interface Expense {
   date: string;
   paid_by: string;
   notes?: string;
-  user_id?: string;
+  user_id: string;
   created_at: string;
 }
 
@@ -44,14 +44,14 @@ export const useExpenses = () => {
     }
   };
 
-  const addExpense = async (expense: Omit<Expense, 'id' | 'created_at' | 'user_id'>) => {
+  const addExpense = async (expenseData: Omit<Expense, 'id' | 'created_at' | 'user_id'>) => {
     if (!user) return;
 
     try {
       const { data, error } = await supabase
         .from('expenses')
         .insert([{
-          ...expense,
+          ...expenseData,
           user_id: user.id,
         }])
         .select()

@@ -18,6 +18,7 @@ export type Database = {
           id: string
           notes: string | null
           paid_by: string
+          user_id: string | null
         }
         Insert: {
           amount: number
@@ -27,6 +28,7 @@ export type Database = {
           id?: string
           notes?: string | null
           paid_by: string
+          user_id?: string | null
         }
         Update: {
           amount?: number
@@ -36,6 +38,7 @@ export type Database = {
           id?: string
           notes?: string | null
           paid_by?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -48,6 +51,7 @@ export type Database = {
           priority: string
           saved_amount: number
           target_amount: number
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -57,6 +61,7 @@ export type Database = {
           priority: string
           saved_amount?: number
           target_amount: number
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -66,6 +71,40 @@ export type Database = {
           priority?: string
           saved_amount?: number
           target_amount?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          partner_first_name: string | null
+          partner_last_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          partner_first_name?: string | null
+          partner_last_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          partner_first_name?: string | null
+          partner_last_name?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

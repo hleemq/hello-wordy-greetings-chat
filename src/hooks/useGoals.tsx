@@ -11,7 +11,7 @@ export interface Goal {
   saved_amount: number;
   deadline: string;
   priority: string;
-  user_id?: string;
+  user_id: string;
   created_at: string;
 }
 
@@ -44,14 +44,14 @@ export const useGoals = () => {
     }
   };
 
-  const addGoal = async (goal: Omit<Goal, 'id' | 'created_at' | 'user_id' | 'saved_amount'>) => {
+  const addGoal = async (goalData: Omit<Goal, 'id' | 'created_at' | 'user_id' | 'saved_amount'>) => {
     if (!user) return;
 
     try {
       const { data, error } = await supabase
         .from('goals')
         .insert([{
-          ...goal,
+          ...goalData,
           user_id: user.id,
           saved_amount: 0,
         }])
@@ -74,7 +74,7 @@ export const useGoals = () => {
     }
   };
 
-  const updateGoal = async (id: string, updates: Partial<Goal>) => {
+  const updateGoal = async (id: string, updates: Partial<Omit<Goal, 'id' | 'user_id' | 'created_at'>>) => {
     if (!user) return;
 
     try {
