@@ -10,7 +10,7 @@ interface FinanceState {
   isLoggedIn: boolean;
   activeProfile: Profile;
   balance: Balance;
-  currentView: 'dashboard' | 'expenses' | 'goals' | 'reports' | 'settings';
+  currentView: 'dashboard' | 'expenses' | 'goals' | 'reports' | 'consultant' | 'settings';
   loading: boolean;
   isOnline: boolean;
 }
@@ -28,7 +28,7 @@ type Action =
   | { type: 'DELETE_GOAL', payload: string }
   | { type: 'SET_LOADING', payload: boolean }
   | { type: 'SET_ONLINE_STATUS', payload: boolean }
-  | { type: 'CHANGE_VIEW', payload: 'dashboard' | 'expenses' | 'goals' | 'reports' | 'settings' };
+  | { type: 'CHANGE_VIEW', payload: 'dashboard' | 'expenses' | 'goals' | 'reports' | 'consultant' | 'settings' };
 
 const calculateBalance = (expenses: Expense[]): Balance => {
   let hasnaaPaid = 0;

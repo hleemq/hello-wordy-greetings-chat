@@ -101,4 +101,64 @@ export const languageStrings = {
     reconnected: "تمت إعادة الاتصال",
     syncingData: "جاري مزامنة بياناتك...",
   },
+  consultant: {
+    en: "Consultant",
+    ar: "المستشار"
+  },
+  theConsultant: {
+    en: "The Consultant",
+    ar: "المستشار المالي"
+  },
+  aiFinancialAdvisor: {
+    en: "AI Financial Advisor",
+    ar: "المستشار المالي الذكي"
+  },
+  monthlySpending: {
+    en: "Monthly Spending",
+    ar: "الإنفاق الشهري"
+  },
+  topCategory: {
+    en: "Top Category",
+    ar: "الفئة الأعلى"
+  },
+  activeGoals: {
+    en: "Active Goals",
+    ar: "الأهداف النشطة"
+  },
+  consultations: {
+    en: "Consultations",
+    ar: "الاستشارات"
+  },
+  financialConsultation: {
+    en: "Financial Consultation",
+    ar: "الاستشارة المالية"
+  },
+  askAboutFinances: {
+    en: "Ask about your finances...",
+    ar: "اسأل عن أموالك..."
+  },
+  smartAnalysis: {
+    en: "Smart Analysis",
+    ar: "التحليل الذكي"
+  },
+  anomalyDetection: {
+    en: "Anomaly Detection",
+    ar: "كشف الشذوذ"
+  },
+  goalPredictions: {
+    en: "Goal Predictions",
+    ar: "توقعات الأهداف"
+  },
+  realTimeInsights: {
+    en: "Real-time insights from your financial data",
+    ar: "رؤى في الوقت الفعلي من بياناتك المالية"
+  },
+  unusualSpendingAlerts: {
+    en: "Alerts for unusual spending patterns",
+    ar: "تنبيهات لأنماط الإنفاق غير العادية"
+  },
+  timelineForecasts: {
+    en: "Timeline forecasts for your savings goals",
+    ar: "توقعات الجدول الزمني لأهداف ادخارك"
+  }
 };
