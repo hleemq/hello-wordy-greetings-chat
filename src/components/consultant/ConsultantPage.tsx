@@ -21,6 +21,15 @@ interface Message {
   };
 }
 
+interface ConversationRecord {
+  id: string;
+  user_id: string;
+  user_message: string;
+  ai_response: string;
+  financial_context: string | null;
+  created_at: string;
+}
+
 const ConsultantPage = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
@@ -55,7 +64,7 @@ const ConsultantPage = () => {
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true })
-        .limit(10);
+        .limit(10) as { data: ConversationRecord[] | null; error: any };
 
       if (error) throw error;
 
@@ -105,7 +114,7 @@ const ConsultantPage = () => {
       const categorySpending = expenses.reduce((acc, exp) => {
         acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
         return acc;
-      }, {});
+      }, {} as Record<string, number>);
 
       const topCategory = Object.entries(categorySpending).sort(([,a], [,b]) => (b as number) - (a as number))[0];
 
