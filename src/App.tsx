@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import StyleGuide from "./components/StyleGuide";
 import PWAIcons from "./pages/PWAIcons";
 import Settings from "./pages/Settings";
+import ConsultantPage from "./pages/ConsultantPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
