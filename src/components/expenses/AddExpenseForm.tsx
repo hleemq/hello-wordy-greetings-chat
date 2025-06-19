@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useFinance } from '@/context/FinanceContext';
+import { useExpenses } from '@/hooks/useExpenses';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from 'lucide-react';
-import { ExpenseCategory } from '@/types/finance';
-import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 // Use this function to format date to YYYY-MM-DD for the date input
 const formatDateForInput = (date: Date): string => {
@@ -22,15 +19,16 @@ const formatDateForInput = (date: Date): string => {
 };
 
 const AddExpenseForm = () => {
-  const { state, dispatch } = useFinance();
+  const { addExpense } = useExpenses();
   const { t } = useLanguage();
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState<ExpenseCategory>('Groceries');
+  const [category, setCategory] = useState('Groceries');
   const [date, setDate] = useState(formatDateForInput(new Date()));
+  const [paidBy, setPaidBy] = useState('Hasnaa');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const categories: ExpenseCategory[] = [
+  const categories = [
     "Rent", "Utilities", "Groceries", "Dining", "Transportation", 
     "Entertainment", "Health", "Shopping", "Other"
   ];
@@ -41,68 +39,24 @@ const AddExpenseForm = () => {
     
     const amountValue = parseFloat(amount);
     if (isNaN(amountValue) || amountValue <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid positive number",
-        variant: "destructive"
-      });
       setLoading(false);
       return;
     }
     
-    try {
-      // Create expense object for database - with date as ISO string
-      const expenseData = {
-        amount: amountValue,
-        category,
-        date: new Date(date).toISOString(),
-        paid_by: state.activeProfile,
-        notes
-      };
-      
-      // Insert into Supabase
-      const { data, error } = await supabase
-        .from('expenses')
-        .insert(expenseData)
-        .select()
-        .single();
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Add to local state
-      const newExpense = {
-        id: data.id,
-        amount: amountValue,
-        category,
-        date: new Date(data.date),
-        paidBy: state.activeProfile,
-        notes
-      };
-      
-      dispatch({ type: 'ADD_EXPENSE', payload: newExpense });
-      
-      // Reset form
-      setAmount('');
-      setCategory('Groceries');
-      setDate(formatDateForInput(new Date()));
-      setNotes('');
-      
-      toast({
-        title: "Expense added",
-        description: `${amountValue.toFixed(2)} MAD for ${t(category.toLowerCase())} has been added.`
-      });
-    } catch (error: any) {
-      console.error('Error adding expense:', error);
-      toast({
-        title: "Error adding expense",
-        description: error.message || "An error occurred while adding the expense.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+    await addExpense({
+      amount: amountValue,
+      category,
+      date: new Date(date).toISOString(),
+      paid_by: paidBy,
+      notes
+    });
+    
+    // Reset form
+    setAmount('');
+    setCategory('Groceries');
+    setDate(formatDateForInput(new Date()));
+    setNotes('');
+    setLoading(false);
   };
 
   return (
@@ -135,7 +89,7 @@ const AddExpenseForm = () => {
         
         <div className="space-y-2">
           <Label htmlFor="category">{t('category')}</Label>
-          <Select value={category} onValueChange={(value) => setCategory(value as ExpenseCategory)}>
+          <Select value={category} onValueChange={setCategory}>
             <SelectTrigger id="category">
               <SelectValue placeholder={t('category')} />
             </SelectTrigger>
@@ -161,25 +115,16 @@ const AddExpenseForm = () => {
         </div>
         
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label>{t('paidBy')}</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <HelpCircle className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>This will use your active profile ({state.activeProfile})</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <div className="h-10 px-3 py-2 border rounded-md bg-gray-50 text-gray-800">
-            {state.activeProfile}
-            <span className="text-xs text-gray-500 ml-2">
-              (You can switch profiles in the top nav)
-            </span>
-          </div>
+          <Label htmlFor="paidBy">{t('paidBy')}</Label>
+          <Select value={paidBy} onValueChange={setPaidBy}>
+            <SelectTrigger id="paidBy">
+              <SelectValue placeholder={t('paidBy')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Hasnaa">Hasnaa</SelectItem>
+              <SelectItem value="Achraf">Achraf</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
       

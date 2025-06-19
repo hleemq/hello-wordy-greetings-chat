@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { useFinance } from '@/context/FinanceContext';
+import { useGoals } from '@/hooks/useGoals';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,12 +10,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { HelpCircle, Edit, Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import AddGoalForm from './AddGoalForm';
 import EditGoalForm from './EditGoalForm';
-import { Goal } from '@/types/finance';
+import { Goal } from '@/hooks/useGoals';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 const GoalsPage = () => {
-  const { state, dispatch } = useFinance();
+  const { goals, loading, refetch } = useGoals();
   const { t } = useLanguage();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
@@ -59,11 +60,12 @@ const GoalsPage = () => {
         throw error;
       }
       
-      dispatch({ type: 'DELETE_GOAL', payload: id });
       toast({
         title: t('goalDeleted'),
         description: t('goalDeletedDescription')
       });
+      
+      refetch();
     } catch (error: any) {
       console.error('Error deleting goal:', error);
       toast({
@@ -88,7 +90,7 @@ const GoalsPage = () => {
   };
 
   // Group goals by priority
-  const goalsByPriority = state.goals.reduce((acc, goal) => {
+  const goalsByPriority = goals.reduce((acc, goal) => {
     if (!acc[goal.priority]) {
       acc[goal.priority] = [];
     }
@@ -101,7 +103,7 @@ const GoalsPage = () => {
     (a, b) => priorityOrder[a as keyof typeof priorityOrder] - priorityOrder[b as keyof typeof priorityOrder]
   );
 
-  if (state.loading) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
@@ -133,12 +135,15 @@ const GoalsPage = () => {
                 {t('trackSavingsGoals')}
               </DialogDescription>
             </DialogHeader>
-            <AddGoalForm onSuccess={() => setDialogOpen(false)} />
+            <AddGoalForm onSuccess={() => {
+              setDialogOpen(false);
+              refetch();
+            }} />
           </DialogContent>
         </Dialog>
       </div>
 
-      {state.goals.length > 0 ? (
+      {goals.length > 0 ? (
         <>
           {/* Priority Matrix Explanation */}
           <Card className="mb-8">
@@ -181,7 +186,7 @@ const GoalsPage = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {goalsByPriority[priority].map(goal => {
-                  const progress = Math.round((goal.savedAmount / goal.targetAmount) * 100);
+                  const progress = Math.round((goal.saved_amount / goal.target_amount) * 100);
                   const monthsLeft = Math.max(
                     1,
                     Math.ceil(
@@ -189,7 +194,7 @@ const GoalsPage = () => {
                       (30 * 24 * 60 * 60 * 1000)
                     )
                   );
-                  const monthlySavingsNeeded = (goal.targetAmount - goal.savedAmount) / monthsLeft;
+                  const monthlySavingsNeeded = (goal.target_amount - goal.saved_amount) / monthsLeft;
                   
                   return (
                     <Card key={goal.id} className={`border-l-4 ${priorityMatrix[goal.priority as keyof typeof priorityMatrix].borderColor}`}>
@@ -251,7 +256,7 @@ const GoalsPage = () => {
                             <div className="text-right">
                               <div className="text-sm text-gray-500">{t('currentSavings')}</div>
                               <div className="text-lg font-semibold">
-                                {goal.savedAmount.toFixed(2)} MAD <span className="text-xs text-gray-500">{t('of')} {goal.targetAmount.toFixed(2)} MAD</span>
+                                {goal.saved_amount.toFixed(2)} MAD <span className="text-xs text-gray-500">{t('of')} {goal.target_amount.toFixed(2)} MAD</span>
                               </div>
                             </div>
                           </div>
@@ -297,7 +302,10 @@ const GoalsPage = () => {
                 {t('update')} "{editingGoal.name}"
               </DialogDescription>
             </DialogHeader>
-            <EditGoalForm goal={editingGoal} onSuccess={() => setEditingGoal(null)} />
+            <EditGoalForm goal={editingGoal} onSuccess={() => {
+              setEditingGoal(null);
+              refetch();
+            }} />
           </DialogContent>
         </Dialog>
       )}

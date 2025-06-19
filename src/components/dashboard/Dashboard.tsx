@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { useFinance } from '@/context/FinanceContext';
+import { useExpenses } from '@/hooks/useExpenses';
+import { useGoals } from '@/hooks/useGoals';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,9 +11,9 @@ import AddExpenseForm from '@/components/expenses/AddExpenseForm';
 import { Button } from "@/components/ui/button";
 
 const Dashboard = () => {
-  const { state } = useFinance();
+  const { expenses, loading: expensesLoading } = useExpenses();
+  const { goals, loading: goalsLoading } = useGoals();
   const { t } = useLanguage();
-  const { expenses, goals, balance } = state;
 
   // Get recent expenses
   const recentExpenses = [...expenses]
@@ -35,8 +36,8 @@ const Dashboard = () => {
       }
       
       // Then by progress percentage (lowest first)
-      const aProgress = (a.savedAmount / a.targetAmount) * 100;
-      const bProgress = (b.savedAmount / b.targetAmount) * 100;
+      const aProgress = (a.saved_amount / a.target_amount) * 100;
+      const bProgress = (b.saved_amount / b.target_amount) * 100;
       return aProgress - bProgress;
     })
     .slice(0, 3);
@@ -52,6 +53,26 @@ const Dashboard = () => {
     (sum, expense) => sum + expense.amount, 
     0
   );
+
+  // Calculate who paid what
+  const hasnaaPaid = expenses.filter(expense => expense.paid_by === 'Hasnaa')
+    .reduce((sum, expense) => sum + expense.amount, 0);
+  const achrafPaid = expenses.filter(expense => expense.paid_by === 'Achraf')
+    .reduce((sum, expense) => sum + expense.amount, 0);
+  
+  const difference = Math.abs(hasnaaPaid - achrafPaid);
+  const whoOwes = hasnaaPaid > achrafPaid ? 'Achraf' : hasnaaPaid < achrafPaid ? 'Hasnaa' : null;
+
+  if (expensesLoading || goalsLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-48"></div>
+          <div className="h-4 bg-gray-200 rounded w-32"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -81,20 +102,20 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="border rounded p-4 text-center">
                   <div className="text-sm text-gray-500">{t('hasnaaPaid')}</div>
-                  <div className="text-xl font-semibold">{balance.hasnaaPaid.toFixed(2)} MAD</div>
+                  <div className="text-xl font-semibold">{hasnaaPaid.toFixed(2)} MAD</div>
                 </div>
                 <div className="border rounded p-4 text-center">
                   <div className="text-sm text-gray-500">{t('achrafPaid')}</div>
-                  <div className="text-xl font-semibold">{balance.achrafPaid.toFixed(2)} MAD</div>
+                  <div className="text-xl font-semibold">{achrafPaid.toFixed(2)} MAD</div>
                 </div>
               </div>
 
               <div className="border-t pt-4">
-                {balance.whoOwes ? (
+                {whoOwes ? (
                   <div className="text-center p-3 bg-gray-50 rounded-md">
-                    <span className="font-medium">{balance.whoOwes}</span> {t('owes')}{' '}
-                    <span className="font-medium">{balance.whoOwes === 'Hasnaa' ? 'Achraf' : 'Hasnaa'}</span>{' '}
-                    <span className="text-lg font-semibold">{balance.amount.toFixed(2)} MAD</span>
+                    <span className="font-medium">{whoOwes}</span> {t('owes')}{' '}
+                    <span className="font-medium">{whoOwes === 'Hasnaa' ? 'Achraf' : 'Hasnaa'}</span>{' '}
+                    <span className="text-lg font-semibold">{difference.toFixed(2)} MAD</span>
                   </div>
                 ) : (
                   <div className="text-center p-3 bg-gray-50 rounded-md">
@@ -132,7 +153,7 @@ const Dashboard = () => {
                         <div>
                           <div>{t(expense.category.toLowerCase())}</div>
                           <div className="text-xs text-gray-500">
-                            {new Date(expense.date).toLocaleDateString()} {t('by')} {expense.paidBy}
+                            {new Date(expense.date).toLocaleDateString()} {t('by')} {expense.paid_by}
                           </div>
                         </div>
                         <div className="font-medium">{expense.amount.toFixed(2)} MAD</div>
@@ -173,7 +194,7 @@ const Dashboard = () => {
             {priorityGoals.length > 0 ? (
               <div className="space-y-4">
                 {priorityGoals.map(goal => {
-                  const progress = Math.round((goal.savedAmount / goal.targetAmount) * 100);
+                  const progress = Math.round((goal.saved_amount / goal.target_amount) * 100);
                   const monthsLeft = Math.max(
                     1,
                     Math.ceil(
@@ -182,7 +203,7 @@ const Dashboard = () => {
                     )
                   );
                   const monthlySavingsNeeded = monthsLeft > 0 
-                    ? (goal.targetAmount - goal.savedAmount) / monthsLeft 
+                    ? (goal.target_amount - goal.saved_amount) / monthsLeft 
                     : 0;
 
                   const priorityLabels = {
@@ -214,7 +235,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                         <div className="mt-2 md:mt-0 text-right">
-                          <div className="text-sm font-medium">{goal.savedAmount} / {goal.targetAmount} MAD</div>
+                          <div className="text-sm font-medium">{goal.saved_amount} / {goal.target_amount} MAD</div>
                           <div className="text-xs text-gray-500">
                             {t('save')} {monthlySavingsNeeded.toFixed(2)} MAD/{t('month')}
                           </div>

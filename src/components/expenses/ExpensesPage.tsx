@@ -1,26 +1,26 @@
+
 import React, { useState } from 'react';
-import { useFinance } from '@/context/FinanceContext';
+import { useExpenses } from '@/hooks/useExpenses';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle, Trash2, Loader2 } from 'lucide-react';
-import { Expense, ExpenseCategory } from '@/types/finance';
 import AddExpenseForm from './AddExpenseForm';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 const ExpensesPage = () => {
-  const { state, dispatch } = useFinance();
+  const { expenses, loading, refetch } = useExpenses();
   const { t, language } = useLanguage();
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<number>(new Date().getMonth());
   const [filterYear, setFilterYear] = useState<number>(new Date().getFullYear());
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const categories: ExpenseCategory[] = [
+  const categories = [
     "Rent", "Utilities", "Groceries", "Dining", "Transportation", 
     "Entertainment", "Health", "Shopping", "Other"
   ];
@@ -28,7 +28,7 @@ const ExpensesPage = () => {
   // Get all available years from expenses
   const years = Array.from(
     new Set(
-      state.expenses.map(expense => new Date(expense.date).getFullYear())
+      expenses.map(expense => new Date(expense.date).getFullYear())
     )
   ).sort((a, b) => b - a);
   
@@ -42,7 +42,7 @@ const ExpensesPage = () => {
     ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
   
   // Filter expenses based on criteria
-  const filteredExpenses = state.expenses.filter(expense => {
+  const filteredExpenses = expenses.filter(expense => {
     const expenseDate = new Date(expense.date);
     const monthMatch = expenseDate.getMonth() === filterMonth;
     const yearMatch = expenseDate.getFullYear() === filterYear;
@@ -67,11 +67,11 @@ const ExpensesPage = () => {
 
   // Calculate who paid what in the filtered view
   const hasnaaTotal = filteredExpenses
-    .filter(expense => expense.paidBy === 'Hasnaa')
+    .filter(expense => expense.paid_by === 'Hasnaa')
     .reduce((sum, expense) => sum + expense.amount, 0);
     
   const achrafTotal = filteredExpenses
-    .filter(expense => expense.paidBy === 'Achraf')
+    .filter(expense => expense.paid_by === 'Achraf')
     .reduce((sum, expense) => sum + expense.amount, 0);
   
   const deleteExpense = async (id: string) => {
@@ -86,11 +86,12 @@ const ExpensesPage = () => {
         throw error;
       }
       
-      dispatch({ type: 'DELETE_EXPENSE', payload: id });
       toast({
         title: t('expenseDeleted'),
         description: t('expenseDeletedDescription')
       });
+      
+      refetch();
     } catch (error: any) {
       console.error('Error deleting expense:', error);
       toast({
@@ -108,7 +109,7 @@ const ExpensesPage = () => {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
 
-  if (state.loading) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
         <div className="flex flex-col items-center gap-2">
@@ -272,7 +273,7 @@ const ExpensesPage = () => {
                       <TableCell className="max-w-[200px] truncate">
                         {expense.notes || '-'}
                       </TableCell>
-                      <TableCell>{expense.paidBy}</TableCell>
+                      <TableCell>{expense.paid_by}</TableCell>
                       <TableCell className="text-right font-medium">
                         {expense.amount.toFixed(2)} MAD
                       </TableCell>

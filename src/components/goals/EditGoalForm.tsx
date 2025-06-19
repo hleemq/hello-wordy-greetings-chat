@@ -1,14 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { useFinance } from '@/context/FinanceContext';
+import { useGoals } from '@/hooks/useGoals';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from '@/components/ui/use-toast';
-import { Goal, GoalPriority } from '@/types/finance';
-import { supabase } from '@/integrations/supabase/client';
+import { Goal } from '@/hooks/useGoals';
 
 interface EditGoalFormProps {
   goal: Goal;
@@ -24,21 +22,21 @@ const formatDateForInput = (date: Date): string => {
 };
 
 const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
-  const { dispatch } = useFinance();
+  const { updateGoal } = useGoals();
   const { t } = useLanguage();
   
   const [name, setName] = useState(goal.name);
-  const [targetAmount, setTargetAmount] = useState(goal.targetAmount.toString());
-  const [savedAmount, setSavedAmount] = useState(goal.savedAmount.toString());
+  const [targetAmount, setTargetAmount] = useState(goal.target_amount.toString());
+  const [savedAmount, setSavedAmount] = useState(goal.saved_amount.toString());
   const [deadline, setDeadline] = useState(formatDateForInput(new Date(goal.deadline)));
-  const [priority, setPriority] = useState<GoalPriority>(goal.priority);
+  const [priority, setPriority] = useState(goal.priority);
   const [loading, setLoading] = useState(false);
 
   // Update form if goal changes
   useEffect(() => {
     setName(goal.name);
-    setTargetAmount(goal.targetAmount.toString());
-    setSavedAmount(goal.savedAmount.toString());
+    setTargetAmount(goal.target_amount.toString());
+    setSavedAmount(goal.saved_amount.toString());
     setDeadline(formatDateForInput(new Date(goal.deadline)));
     setPriority(goal.priority);
   }, [goal]);
@@ -51,85 +49,33 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
     const savedAmountValue = parseFloat(savedAmount);
     
     if (isNaN(targetAmountValue) || targetAmountValue <= 0) {
-      toast({
-        title: t('invalidAmount'),
-        description: t('enterValidAmount'),
-        variant: "destructive"
-      });
       setLoading(false);
       return;
     }
     
     if (isNaN(savedAmountValue) || savedAmountValue < 0) {
-      toast({
-        title: t('invalidAmount'),
-        description: t('enterValidNonNegative'),
-        variant: "destructive"
-      });
       setLoading(false);
       return;
     }
     
     if (savedAmountValue > targetAmountValue) {
-      toast({
-        title: t('invalidAmounts'),
-        description: t('savedGreaterThanTarget'),
-        variant: "destructive"
-      });
       setLoading(false);
       return;
     }
     
-    try {
-      // Create goal object for database - with deadline as ISO string
-      const goalData = {
-        name,
-        target_amount: targetAmountValue,
-        saved_amount: savedAmountValue,
-        deadline: new Date(deadline).toISOString(),
-        priority
-      };
-      
-      // Update in Supabase
-      const { error } = await supabase
-        .from('goals')
-        .update(goalData)
-        .eq('id', goal.id);
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Update in local state
-      const updatedGoal: Goal = {
-        ...goal,
-        name,
-        targetAmount: targetAmountValue,
-        savedAmount: savedAmountValue,
-        deadline: new Date(deadline),
-        priority
-      };
-      
-      dispatch({ type: 'UPDATE_GOAL', payload: updatedGoal });
-      
-      toast({
-        title: t('goalUpdated'),
-        description: `${t('changesTo')} "${name}" ${t('saved')}.`
-      });
-      
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (error: any) {
-      console.error('Error updating goal:', error);
-      toast({
-        title: t('errorUpdatingGoal'),
-        description: error.message || t('anErrorOccurred'),
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+    await updateGoal(goal.id, {
+      name,
+      target_amount: targetAmountValue,
+      saved_amount: savedAmountValue,
+      deadline: new Date(deadline).toISOString(),
+      priority
+    });
+    
+    if (onSuccess) {
+      onSuccess();
     }
+    
+    setLoading(false);
   };
 
   return (
@@ -186,7 +132,7 @@ const EditGoalForm: React.FC<EditGoalFormProps> = ({ goal, onSuccess }) => {
         
         <div className="space-y-2">
           <Label htmlFor="priority">{t('priority')}</Label>
-          <Select value={priority} onValueChange={(value) => setPriority(value as GoalPriority)}>
+          <Select value={priority} onValueChange={setPriority}>
             <SelectTrigger id="priority">
               <SelectValue placeholder={t('selectPriority')} />
             </SelectTrigger>
