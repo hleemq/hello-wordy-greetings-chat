@@ -29,22 +29,21 @@ serve(async (req) => {
       console.error('No authorization header found');
       throw new Error('Authorization header is required');
     }
+
+    // Extract the JWT token from the authorization header
+    const token = authHeader.replace('Bearer ', '');
+    console.log('Token extracted:', !!token);
     
-    // Initialize Supabase client with proper auth
+    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { 
-        global: { 
-          headers: { Authorization: authHeader } 
-        } 
-      }
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
     console.log('Supabase client initialized');
 
-    // Get user from token
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    // Get user from token using the session
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     console.log('Auth user result:', { user: !!user, error: userError });
     
     if (userError) {
@@ -57,6 +56,40 @@ serve(async (req) => {
     }
 
     console.log('User authenticated:', user.id);
+
+    // Test Google Gemini API connection first
+    console.log('Testing Google Gemini API connection...');
+    const geminiApiKey = 'AIzaSyAhXN1EvUXmHSYQMeuWljx_UJS_wVJPGng';
+    
+    // Simple test call to verify API connectivity
+    const testResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: "Hello, this is a test message. Please respond with 'API connection successful'."
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 50,
+        }
+      })
+    });
+
+    console.log('Gemini API test response status:', testResponse.status);
+    
+    if (!testResponse.ok) {
+      const errorText = await testResponse.text();
+      console.error('Gemini API test failed:', errorText);
+      throw new Error(`Gemini API connection failed: ${testResponse.status} - ${errorText}`);
+    }
+
+    const testData = await testResponse.json();
+    console.log('Gemini API test successful:', testData.candidates?.[0]?.content?.parts?.[0]?.text);
 
     // Fetch comprehensive user financial data
     console.log('Fetching user financial data...');
@@ -183,10 +216,9 @@ ${monthlyExpenses.slice(0, 10).map(exp => `- ${new Date(exp.date).toLocaleDateSt
 USER QUESTION: ${message}
 `;
 
-    console.log('Calling Google Gemini API...');
+    console.log('Calling Google Gemini API for financial advice...');
 
-    // Call Google Gemini API with the provided API key
-    const geminiApiKey = 'AIzaSyCexW8RU1ufTLDA2mjRr1b-bkPBcxMCE9A';
+    // Call Google Gemini API with comprehensive financial context
     const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
@@ -242,7 +274,7 @@ Please analyze this data thoroughly and provide comprehensive financial advice b
     }
 
     const geminiData = await geminiResponse.json();
-    console.log('Gemini API response received');
+    console.log('Gemini API response received successfully');
     
     if (!geminiData.candidates || geminiData.candidates.length === 0) {
       console.error('No candidates in Gemini response:', geminiData);
@@ -250,7 +282,7 @@ Please analyze this data thoroughly and provide comprehensive financial advice b
     }
 
     const aiResponse = geminiData.candidates[0].content.parts[0].text;
-    console.log('AI response extracted successfully');
+    console.log('AI response extracted successfully, length:', aiResponse.length);
 
     // Store conversation in database
     console.log('Storing conversation in database...');
