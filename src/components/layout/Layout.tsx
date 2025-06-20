@@ -35,10 +35,12 @@ const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <Navigation />
-      <main className="pt-16 pb-20">
-        {renderPage()}
+      <main className="flex-1 pt-16 pb-4 md:pb-8 overflow-hidden">
+        <div className="h-full">
+          {renderPage()}
+        </div>
       </main>
       <InstallPrompt />
       <NetworkStatus />

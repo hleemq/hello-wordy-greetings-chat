@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -206,14 +205,14 @@ const ConsultantPage = () => {
   const isRTL = language === 'ar';
 
   return (
-    <div className={`container mx-auto px-4 py-8 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="max-w-4xl mx-auto">
+    <div className={`h-full ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="container mx-auto px-4 py-4 h-full max-w-6xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-franklin-heavy text-midnight mb-2">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-franklin-heavy text-midnight mb-2">
             {language === 'ar' ? '💼 المستشار المالي' : '💼 The Consultant'}
           </h1>
-          <p className="text-gray-600 font-franklin-book">
+          <p className="text-gray-600 font-franklin-book text-sm md:text-base">
             {language === 'ar' 
               ? 'مستشارك المالي الذكي الذي يحلل بياناتك في الوقت الفعلي'
               : 'Your AI-powered financial advisor analyzing your data in real-time'
@@ -223,58 +222,66 @@ const ConsultantPage = () => {
 
         {/* Quick Insights Cards */}
         {quickInsights && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-sunshine/10">
-              <CardContent className="p-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+            <Card className="bg-sunshine/10 border-sunshine/20">
+              <CardContent className="p-3 md:p-4">
                 <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                  <TrendingUp className="h-5 w-5 text-sunshine" />
-                  <div>
-                    <p className="text-sm text-gray-600">
+                  <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-sunshine flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs md:text-sm text-gray-600 truncate">
                       {language === 'ar' ? 'الإنفاق الشهري' : 'Monthly Spending'}
                     </p>
-                    <p className="font-franklin-heavy text-lg">{quickInsights.monthlySpending?.toFixed(2)} MAD</p>
+                    <p className="font-franklin-heavy text-sm md:text-lg truncate">
+                      {quickInsights.monthlySpending?.toFixed(2)} MAD
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-mindaro/10">
-              <CardContent className="p-4">
+            <Card className="bg-mindaro/10 border-mindaro/20">
+              <CardContent className="p-3 md:p-4">
                 <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                  <AlertTriangle className="h-5 w-5 text-mindaro" />
-                  <div>
-                    <p className="text-sm text-gray-600">
+                  <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-mindaro flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs md:text-sm text-gray-600 truncate">
                       {language === 'ar' ? 'الفئة الأعلى' : 'Top Category'}
                     </p>
-                    <p className="font-franklin-heavy text-lg">{quickInsights.topCategory?.[0] || 'N/A'}</p>
+                    <p className="font-franklin-heavy text-sm md:text-lg truncate">
+                      {quickInsights.topCategory?.[0] || 'N/A'}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-cloud/10">
-              <CardContent className="p-4">
+            <Card className="bg-cloud/10 border-cloud/20">
+              <CardContent className="p-3 md:p-4">
                 <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                  <Target className="h-5 w-5 text-midnight" />
-                  <div>
-                    <p className="text-sm text-gray-600">
+                  <Target className="h-4 w-4 md:h-5 md:w-5 text-midnight flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs md:text-sm text-gray-600 truncate">
                       {language === 'ar' ? 'الأهداف النشطة' : 'Active Goals'}
                     </p>
-                    <p className="font-franklin-heavy text-lg">{quickInsights.activeGoals}/{quickInsights.totalGoals}</p>
+                    <p className="font-franklin-heavy text-sm md:text-lg truncate">
+                      {quickInsights.activeGoals}/{quickInsights.totalGoals}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-success/10">
-              <CardContent className="p-4">
+            <Card className="bg-success/10 border-success/20">
+              <CardContent className="p-3 md:p-4">
                 <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                  <MessageCircle className="h-5 w-5 text-success" />
-                  <div>
-                    <p className="text-sm text-gray-600">
+                  <MessageCircle className="h-4 w-4 md:h-5 md:w-5 text-success flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs md:text-sm text-gray-600 truncate">
                       {language === 'ar' ? 'الاستشارات' : 'Consultations'}
                     </p>
-                    <p className="font-franklin-heavy text-lg">{Math.floor(messages.length / 2)}</p>
+                    <p className="font-franklin-heavy text-sm md:text-lg truncate">
+                      {Math.floor(messages.length / 2)}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -283,26 +290,26 @@ const ConsultantPage = () => {
         )}
 
         {/* Chat Interface */}
-        <Card className="h-96 flex flex-col">
-          <CardHeader className="pb-4">
-            <CardTitle className="font-franklin-heavy">
+        <Card className="flex flex-col" style={{ height: 'calc(100vh - 400px)', minHeight: '400px', maxHeight: '600px' }}>
+          <CardHeader className="pb-3 flex-shrink-0">
+            <CardTitle className="font-franklin-heavy text-lg md:text-xl">
               {language === 'ar' ? 'الاستشارة المالية' : 'Financial Consultation'}
             </CardTitle>
           </CardHeader>
           
-          <CardContent className="flex-1 flex flex-col">
+          <CardContent className="flex-1 flex flex-col min-h-0 p-4 md:p-6">
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto space-y-4 mb-4 max-h-64">
+            <div className="flex-1 overflow-y-auto space-y-3 mb-4 pr-2">
               {messages.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p className="font-franklin-book">
+                  <MessageCircle className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-4 text-gray-300" />
+                  <p className="font-franklin-book text-sm md:text-base">
                     {language === 'ar' 
                       ? 'اسألني أي شيء حول أموالك!'
                       : 'Ask me anything about your finances!'
                     }
                   </p>
-                  <p className="text-sm mt-2">
+                  <p className="text-xs md:text-sm mt-2 text-gray-400">
                     {language === 'ar' 
                       ? 'أنا هنا لمساعدتك!'
                       : 'I\'m here to help!'
@@ -319,13 +326,15 @@ const ConsultantPage = () => {
                     }`}
                   >
                     <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                      className={`max-w-xs lg:max-w-md px-3 py-2 rounded-lg shadow-sm ${
                         message.type === 'user'
                           ? 'bg-sunshine text-midnight'
-                          : 'bg-gray-100 text-gray-800'
+                          : 'bg-gray-100 text-gray-800 border'
                       }`}
                     >
-                      <p className="font-franklin-book text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p className="font-franklin-book text-sm whitespace-pre-wrap leading-relaxed">
+                        {message.content}
+                      </p>
                       <p className="text-xs mt-1 opacity-70">
                         {message.timestamp.toLocaleTimeString()}
                       </p>
@@ -335,8 +344,13 @@ const ConsultantPage = () => {
               )}
               {isLoading && (
                 <div className={`flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
-                  <div className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  <div className="bg-gray-100 text-gray-800 px-3 py-2 rounded-lg border">
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">
+                        {language === 'ar' ? 'جاري التفكير...' : 'Thinking...'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -345,7 +359,7 @@ const ConsultantPage = () => {
 
             {/* Quick Questions */}
             {messages.length === 0 && (
-              <div className="mb-4">
+              <div className="mb-4 flex-shrink-0">
                 <p className="text-sm text-gray-600 mb-2 font-franklin-medium">
                   {language === 'ar' ? 'أسئلة سريعة:' : 'Quick questions:'}
                 </p>
@@ -356,7 +370,7 @@ const ConsultantPage = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => setInputMessage(question)}
-                      className="text-xs"
+                      className="text-xs border-gray-200 hover:bg-gray-50"
                     >
                       {question}
                     </Button>
@@ -366,7 +380,7 @@ const ConsultantPage = () => {
             )}
 
             {/* Input Area */}
-            <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+            <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''} flex-shrink-0`}>
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
@@ -382,7 +396,7 @@ const ConsultantPage = () => {
               <Button 
                 onClick={sendMessage} 
                 disabled={isLoading || !inputMessage.trim()}
-                className="bg-sunshine hover:bg-sunshine/90"
+                className="bg-sunshine hover:bg-sunshine/90 text-midnight flex-shrink-0"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -391,37 +405,39 @@ const ConsultantPage = () => {
         </Card>
 
         {/* Features Info */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-          <div className="p-4">
-            <TrendingUp className="h-8 w-8 mx-auto mb-2 text-sunshine" />
-            <h3 className="font-franklin-heavy text-midnight">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <div className="p-3 md:p-4">
+            <TrendingUp className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-sunshine" />
+            <h3 className="font-franklin-heavy text-midnight text-sm md:text-base">
               {language === 'ar' ? 'تحليل ذكي' : 'Smart Analysis'}
             </h3>
-            <p className="text-sm text-gray-600 font-franklin-book">
+            <p className="text-xs md:text-sm text-gray-600 font-franklin-book mt-1">
               {language === 'ar' 
                 ? 'رؤى في الوقت الفعلي من بياناتك المالية'
                 : 'Real-time insights from your financial data'
               }
             </p>
           </div>
-          <div className="p-4">
-            <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-error" />
-            <h3 className="font-franklin-heavy text-midnight">
+          
+          <div className="p-3 md:p-4">
+            <AlertTriangle className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-error" />
+            <h3 className="font-franklin-heavy text-midnight text-sm md:text-base">
               {language === 'ar' ? 'كشف الشذوذ' : 'Anomaly Detection'}
             </h3>
-            <p className="text-sm text-gray-600 font-franklin-book">
+            <p className="text-xs md:text-sm text-gray-600 font-franklin-book mt-1">
               {language === 'ar' 
                 ? 'تنبيهات لأنماط الإنفاق غير العادية'
                 : 'Alerts for unusual spending patterns'
               }
             </p>
           </div>
-          <div className="p-4">
-            <Target className="h-8 w-8 mx-auto mb-2 text-success" />
-            <h3 className="font-franklin-heavy text-midnight">
+          
+          <div className="p-3 md:p-4">
+            <Target className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-success" />
+            <h3 className="font-franklin-heavy text-midnight text-sm md:text-base">
               {language === 'ar' ? 'توقعات الأهداف' : 'Goal Predictions'}
             </h3>
-            <p className="text-sm text-gray-600 font-franklin-book">
+            <p className="text-xs md:text-sm text-gray-600 font-franklin-book mt-1">
               {language === 'ar' 
                 ? 'توقعات الجدول الزمني لأهداف ادخارك'
                 : 'Timeline forecasts for your savings goals'
