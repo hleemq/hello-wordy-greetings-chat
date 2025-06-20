@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useFinance } from '@/context/FinanceContext';
 import { useAuth } from '@/context/AuthContext';
@@ -49,6 +50,7 @@ const Navigation = () => {
     { id: 'expenses', label: t('expenses') },
     { id: 'goals', label: t('goals') },
     { id: 'reports', label: t('reports') },
+    { id: 'consultant', label: '💼 Consultant' },
   ];
 
   return (
@@ -149,7 +151,7 @@ const Navigation = () => {
       
       {/* Mobile Navigation */}
       <div className="md:hidden border-t border-mindaro/20">
-        <div className="grid grid-cols-4 divide-x divide-mindaro/20">
+        <div className="grid grid-cols-5 divide-x divide-mindaro/20">
           {navItems.map((item) => (
             <button
               key={item.id}
