@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 type LanguageType = 'en' | 'ar';
@@ -103,7 +104,7 @@ const translations = {
     'achrafPaid': 'Achraf Paid',
     'owes': 'owes',
     'balancedExpenses': 'Expenses are balanced',
-    'monthlySpending': 'Monthly Spending',
+    'monthlySpendingOverview': 'Monthly Spending',
     'overviewFor': 'Overview for',
     'totalSpentThisMonth': 'Total spent this month',
     'recentExpenses': 'Recent Expenses',
@@ -119,7 +120,7 @@ const translations = {
     'consultant': 'Consultant',
     'theConsultant': 'The Consultant',
     'aiFinancialAdvisor': 'AI Financial Advisor',
-    'monthlySpending': 'Monthly Spending',
+    'monthlySpendingStats': 'Monthly Spending',
     'topCategory': 'Top Category',
     'activeGoals': 'Active Goals',
     'consultations': 'Consultations',
@@ -229,7 +230,7 @@ const translations = {
     'achrafPaid': 'دفع أشرف',
     'owes': 'مدين لـ',
     'balancedExpenses': 'النفقات متوازنة',
-    'monthlySpending': 'الإنفاق الشهري',
+    'monthlySpendingOverview': 'الإنفاق الشهري',
     'overviewFor': 'نظرة عامة لشهر',
     'totalSpentThisMonth': 'إجمالي الإنفاق هذا الشهر',
     'recentExpenses': 'المصاريف الأخيرة',
@@ -245,7 +246,7 @@ const translations = {
     'consultant': 'المستشار',
     'theConsultant': 'المستشار المالي',
     'aiFinancialAdvisor': 'المستشار المالي الذكي',
-    'monthlySpending': 'الإنفاق الشهري',
+    'monthlySpendingStats': 'الإنفاق الشهري',
     'topCategory': 'الفئة الأعلى',
     'activeGoals': 'الأهداف النشطة',
     'consultations': 'الاستشارات',
