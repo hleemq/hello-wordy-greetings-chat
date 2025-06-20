@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
@@ -59,10 +58,11 @@ serve(async (req) => {
 
     // Test Google Gemini API connection first
     console.log('Testing Google Gemini API connection...');
-    const geminiApiKey = 'AIzaSyAhXN1EvUXmHSYQMeuWljx_UJS_wVJPGng';
+    // IMPORTANT: For production, move this to Deno.env.get('GEMINI_API_KEY')
+    const geminiApiKey = 'AIzaSyAhXN1EvUXmHSYQMeuWljx_UJS_wVJPGng'; 
     
     // Simple test call to verify API connectivity
-    const testResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+    const testResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -167,17 +167,17 @@ serve(async (req) => {
         monthsLeft,
         monthlyNeeded,
         priority: goal.priority,
-        onTrack: monthlyNeeded <= (monthlyTotal * 0.3)
+        onTrack: monthlyNeeded <= (monthlyTotal * 0.3) // Example logic for onTrack
       };
     });
 
     // Spending trends
-    const avgMonthlySpending = last3MonthsExpenses.reduce((sum, exp) => sum + exp.amount, 0) / 3;
+    const avgMonthlySpending = last3MonthsExpenses.reduce((sum, exp) => sum + exp.amount, 0) / (last3MonthsExpenses.length > 0 ? 3 : 1); // Avoid division by zero
     const spendingTrend = monthlyTotal > avgMonthlySpending ? 'increasing' : 'decreasing';
-    const trendPercentage = Math.abs(((monthlyTotal - avgMonthlySpending) / avgMonthlySpending) * 100);
+    const trendPercentage = Math.abs(((monthlyTotal - avgMonthlySpending) / (avgMonthlySpending || 1)) * 100); // Avoid division by zero
 
     // Anomaly detection
-    const avgExpenseAmount = expenses.reduce((sum, exp) => sum + exp.amount, 0) / expenses.length;
+    const avgExpenseAmount = expenses.length > 0 ? expenses.reduce((sum, exp) => sum + exp.amount, 0) / expenses.length : 0; // Avoid division by zero
     const largeExpenses = monthlyExpenses.filter(exp => exp.amount > avgExpenseAmount * 2);
 
     // Create comprehensive financial context
@@ -219,7 +219,7 @@ USER QUESTION: ${message}
     console.log('Calling Google Gemini API for financial advice...');
 
     // Call Google Gemini API with comprehensive financial context
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
