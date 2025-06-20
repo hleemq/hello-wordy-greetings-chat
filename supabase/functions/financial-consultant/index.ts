@@ -21,17 +21,32 @@ serve(async (req) => {
     const { message } = await req.json();
     console.log('User message received:', message);
     
-    // Initialize Supabase client
+    // Get authorization header
+    const authHeader = req.headers.get('Authorization');
+    console.log('Authorization header present:', !!authHeader);
+    
+    if (!authHeader) {
+      console.error('No authorization header found');
+      throw new Error('Authorization header is required');
+    }
+    
+    // Initialize Supabase client with proper auth
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      { 
+        global: { 
+          headers: { Authorization: authHeader } 
+        } 
+      }
     );
 
     console.log('Supabase client initialized');
 
     // Get user from token
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    console.log('Auth user result:', { user: !!user, error: userError });
+    
     if (userError) {
       console.error('Error getting user:', userError);
       throw new Error(`Authentication error: ${userError.message}`);
@@ -50,6 +65,12 @@ serve(async (req) => {
       supabaseClient.from('goals').select('*').eq('user_id', user.id).order('deadline', { ascending: true }),
       supabaseClient.from('profiles').select('*').eq('id', user.id).single()
     ]);
+
+    console.log('Database query results:', {
+      expenses: { count: expensesResult.data?.length || 0, error: expensesResult.error },
+      goals: { count: goalsResult.data?.length || 0, error: goalsResult.error },
+      profile: { exists: !!profileResult.data, error: profileResult.error }
+    });
 
     if (expensesResult.error) {
       console.error('Error fetching expenses:', expensesResult.error);
