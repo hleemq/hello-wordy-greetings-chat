@@ -114,6 +114,26 @@ const translations = {
     'goalProgressTooltip': 'This shows your progress towards your savings goals',
     'saveMontly': 'Save',
     'monthPeriod': 'month',
+    
+    // Consultant specific
+    'consultant': 'Consultant',
+    'theConsultant': 'The Consultant',
+    'aiFinancialAdvisor': 'AI Financial Advisor',
+    'monthlySpending': 'Monthly Spending',
+    'topCategory': 'Top Category',
+    'activeGoals': 'Active Goals',
+    'consultations': 'Consultations',
+    'financialConsultation': 'Financial Consultation',
+    'askAboutFinances': 'Ask about your finances...',
+    'smartAnalysis': 'Smart Analysis',
+    'anomalyDetection': 'Anomaly Detection',
+    'goalPredictions': 'Goal Predictions',
+    'realTimeInsights': 'Real-time insights from your financial data',
+    'unusualSpendingAlerts': 'Alerts for unusual spending patterns',
+    'timelineForecasts': 'Timeline forecasts for your savings goals',
+    'quickQuestions': 'Quick questions:',
+    'askMeAnything': 'Ask me anything about your finances!',
+    'imHereToHelp': 'I\'m here to help!',
   },
   ar: {
     // Dashboard
@@ -220,6 +240,26 @@ const translations = {
     'goalProgressTooltip': 'يوضح هذا تقدمك نحو أهداف التوفير الخاصة بك',
     'saveMontly': 'توفير',
     'monthPeriod': 'شهر',
+    
+    // Consultant specific
+    'consultant': 'المستشار',
+    'theConsultant': 'المستشار المالي',
+    'aiFinancialAdvisor': 'المستشار المالي الذكي',
+    'monthlySpending': 'الإنفاق الشهري',
+    'topCategory': 'الفئة الأعلى',
+    'activeGoals': 'الأهداف النشطة',
+    'consultations': 'الاستشارات',
+    'financialConsultation': 'الاستشارة المالية',
+    'askAboutFinances': 'اسأل عن أموالك...',
+    'smartAnalysis': 'تحليل ذكي',
+    'anomalyDetection': 'كشف الشذوذ',
+    'goalPredictions': 'توقعات الأهداف',
+    'realTimeInsights': 'رؤى في الوقت الفعلي من بياناتك المالية',
+    'unusualSpendingAlerts': 'تنبيهات لأنماط الإنفاق غير العادية',
+    'timelineForecasts': 'توقعات الجدول الزمني لأهداف ادخارك',
+    'quickQuestions': 'أسئلة سريعة:',
+    'askMeAnything': 'اسألني أي شيء حول أموالك!',
+    'imHereToHelp': 'أنا هنا لمساعدتك!',
   }
 };
 

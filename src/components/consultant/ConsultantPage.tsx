@@ -144,11 +144,22 @@ const ConsultantPage = () => {
     setIsLoading(true);
 
     try {
+      console.log('Sending message to consultant function...');
       const { data, error } = await supabase.functions.invoke('financial-consultant', {
         body: { message: inputMessage }
       });
 
-      if (error) throw error;
+      console.log('Response from consultant function:', data, error);
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      if (data.error) {
+        console.error('Function returned error:', data.error);
+        throw new Error(data.error);
+      }
 
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
@@ -160,12 +171,12 @@ const ConsultantPage = () => {
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error: any) {
+      console.error('Error sending message:', error);
       toast({
-        title: "Error",
-        description: "Failed to get response from consultant",
+        title: "خطأ / Error",
+        description: `Failed to get response from consultant: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
-      console.error('Error sending message:', error);
     } finally {
       setIsLoading(false);
     }
@@ -178,24 +189,35 @@ const ConsultantPage = () => {
     }
   };
 
-  const quickQuestions = [
+  const quickQuestions = language === 'ar' ? [
+    "كيف يمكنني تقليل مصاريفي الشهرية؟",
+    "متى سأحقق أهداف الادخار؟",
+    "ما هي أكبر فئة إنفاق لدي؟",
+    "هل هناك أنماط إنفاق غير عادية؟",
+    "كيف يمكنني تحسين وضعي المالي؟"
+  ] : [
     "How can I reduce my monthly expenses?",
     "When will I reach my savings goals?",
     "What's my biggest spending category?",
     "Are there any unusual spending patterns?",
-    "كيف يمكنني تحسين وضعي المالي؟" // Arabic: How can I improve my financial situation?
+    "How can I improve my financial situation?"
   ];
 
+  const isRTL = language === 'ar';
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className={`container mx-auto px-4 py-8 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-franklin-heavy text-midnight mb-2">
-            💼 The Consultant
+            {language === 'ar' ? '💼 المستشار المالي' : '💼 The Consultant'}
           </h1>
           <p className="text-gray-600 font-franklin-book">
-            Your AI-powered financial advisor analyzing your data in real-time
+            {language === 'ar' 
+              ? 'مستشارك المالي الذكي الذي يحلل بياناتك في الوقت الفعلي'
+              : 'Your AI-powered financial advisor analyzing your data in real-time'
+            }
           </p>
         </div>
 
@@ -204,10 +226,12 @@ const ConsultantPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <Card className="bg-sunshine/10">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
+                <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
                   <TrendingUp className="h-5 w-5 text-sunshine" />
                   <div>
-                    <p className="text-sm text-gray-600">Monthly Spending</p>
+                    <p className="text-sm text-gray-600">
+                      {language === 'ar' ? 'الإنفاق الشهري' : 'Monthly Spending'}
+                    </p>
                     <p className="font-franklin-heavy text-lg">{quickInsights.monthlySpending?.toFixed(2)} MAD</p>
                   </div>
                 </div>
@@ -216,10 +240,12 @@ const ConsultantPage = () => {
 
             <Card className="bg-mindaro/10">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
+                <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
                   <AlertTriangle className="h-5 w-5 text-mindaro" />
                   <div>
-                    <p className="text-sm text-gray-600">Top Category</p>
+                    <p className="text-sm text-gray-600">
+                      {language === 'ar' ? 'الفئة الأعلى' : 'Top Category'}
+                    </p>
                     <p className="font-franklin-heavy text-lg">{quickInsights.topCategory?.[0] || 'N/A'}</p>
                   </div>
                 </div>
@@ -228,10 +254,12 @@ const ConsultantPage = () => {
 
             <Card className="bg-cloud/10">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
+                <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
                   <Target className="h-5 w-5 text-midnight" />
                   <div>
-                    <p className="text-sm text-gray-600">Active Goals</p>
+                    <p className="text-sm text-gray-600">
+                      {language === 'ar' ? 'الأهداف النشطة' : 'Active Goals'}
+                    </p>
                     <p className="font-franklin-heavy text-lg">{quickInsights.activeGoals}/{quickInsights.totalGoals}</p>
                   </div>
                 </div>
@@ -240,10 +268,12 @@ const ConsultantPage = () => {
 
             <Card className="bg-success/10">
               <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
+                <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
                   <MessageCircle className="h-5 w-5 text-success" />
                   <div>
-                    <p className="text-sm text-gray-600">Consultations</p>
+                    <p className="text-sm text-gray-600">
+                      {language === 'ar' ? 'الاستشارات' : 'Consultations'}
+                    </p>
                     <p className="font-franklin-heavy text-lg">{Math.floor(messages.length / 2)}</p>
                   </div>
                 </div>
@@ -255,7 +285,9 @@ const ConsultantPage = () => {
         {/* Chat Interface */}
         <Card className="h-96 flex flex-col">
           <CardHeader className="pb-4">
-            <CardTitle className="font-franklin-heavy">Financial Consultation</CardTitle>
+            <CardTitle className="font-franklin-heavy">
+              {language === 'ar' ? 'الاستشارة المالية' : 'Financial Consultation'}
+            </CardTitle>
           </CardHeader>
           
           <CardContent className="flex-1 flex flex-col">
@@ -264,14 +296,27 @@ const ConsultantPage = () => {
               {messages.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">
                   <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p className="font-franklin-book">Ask me anything about your finances!</p>
-                  <p className="text-sm mt-2">اسألني أي شيء حول أموالك!</p>
+                  <p className="font-franklin-book">
+                    {language === 'ar' 
+                      ? 'اسألني أي شيء حول أموالك!'
+                      : 'Ask me anything about your finances!'
+                    }
+                  </p>
+                  <p className="text-sm mt-2">
+                    {language === 'ar' 
+                      ? 'أنا هنا لمساعدتك!'
+                      : 'I\'m here to help!'
+                    }
+                  </p>
                 </div>
               ) : (
                 messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${message.type === 'user' 
+                      ? (isRTL ? 'justify-start' : 'justify-end')
+                      : (isRTL ? 'justify-end' : 'justify-start')
+                    }`}
                   >
                     <div
                       className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
@@ -289,7 +334,7 @@ const ConsultantPage = () => {
                 ))
               )}
               {isLoading && (
-                <div className="flex justify-start">
+                <div className={`flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
                   <div className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">
                     <Loader2 className="h-4 w-4 animate-spin" />
                   </div>
@@ -301,7 +346,9 @@ const ConsultantPage = () => {
             {/* Quick Questions */}
             {messages.length === 0 && (
               <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2 font-franklin-medium">Quick questions:</p>
+                <p className="text-sm text-gray-600 mb-2 font-franklin-medium">
+                  {language === 'ar' ? 'أسئلة سريعة:' : 'Quick questions:'}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {quickQuestions.slice(0, 3).map((question, index) => (
                     <Button
@@ -319,14 +366,18 @@ const ConsultantPage = () => {
             )}
 
             {/* Input Area */}
-            <div className="flex space-x-2">
+            <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask about your finances... / اسأل عن أموالك..."
+                placeholder={language === 'ar' 
+                  ? "اسأل عن أموالك..."
+                  : "Ask about your finances..."
+                }
                 className="flex-1 font-franklin-book"
                 disabled={isLoading}
+                dir={isRTL ? 'rtl' : 'ltr'}
               />
               <Button 
                 onClick={sendMessage} 
@@ -343,18 +394,39 @@ const ConsultantPage = () => {
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
           <div className="p-4">
             <TrendingUp className="h-8 w-8 mx-auto mb-2 text-sunshine" />
-            <h3 className="font-franklin-heavy text-midnight">Smart Analysis</h3>
-            <p className="text-sm text-gray-600 font-franklin-book">Real-time insights from your financial data</p>
+            <h3 className="font-franklin-heavy text-midnight">
+              {language === 'ar' ? 'تحليل ذكي' : 'Smart Analysis'}
+            </h3>
+            <p className="text-sm text-gray-600 font-franklin-book">
+              {language === 'ar' 
+                ? 'رؤى في الوقت الفعلي من بياناتك المالية'
+                : 'Real-time insights from your financial data'
+              }
+            </p>
           </div>
           <div className="p-4">
             <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-error" />
-            <h3 className="font-franklin-heavy text-midnight">Anomaly Detection</h3>
-            <p className="text-sm text-gray-600 font-franklin-book">Alerts for unusual spending patterns</p>
+            <h3 className="font-franklin-heavy text-midnight">
+              {language === 'ar' ? 'كشف الشذوذ' : 'Anomaly Detection'}
+            </h3>
+            <p className="text-sm text-gray-600 font-franklin-book">
+              {language === 'ar' 
+                ? 'تنبيهات لأنماط الإنفاق غير العادية'
+                : 'Alerts for unusual spending patterns'
+              }
+            </p>
           </div>
           <div className="p-4">
             <Target className="h-8 w-8 mx-auto mb-2 text-success" />
-            <h3 className="font-franklin-heavy text-midnight">Goal Predictions</h3>
-            <p className="text-sm text-gray-600 font-franklin-book">Timeline forecasts for your savings goals</p>
+            <h3 className="font-franklin-heavy text-midnight">
+              {language === 'ar' ? 'توقعات الأهداف' : 'Goal Predictions'}
+            </h3>
+            <p className="text-sm text-gray-600 font-franklin-book">
+              {language === 'ar' 
+                ? 'توقعات الجدول الزمني لأهداف ادخارك'
+                : 'Timeline forecasts for your savings goals'
+              }
+            </p>
           </div>
         </div>
       </div>

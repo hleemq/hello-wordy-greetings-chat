@@ -9,12 +9,17 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('Financial consultant function called');
+  
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('Processing request...');
     const { message } = await req.json();
+    console.log('User message received:', message);
     
     // Initialize Supabase client
     const supabaseClient = createClient(
@@ -23,24 +28,43 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     );
 
+    console.log('Supabase client initialized');
+
     // Get user from token
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError) {
+      console.error('Error getting user:', userError);
+      throw new Error(`Authentication error: ${userError.message}`);
+    }
     if (!user) {
-      throw new Error('Unauthorized');
+      console.error('No user found in token');
+      throw new Error('Unauthorized - no user found');
     }
 
+    console.log('User authenticated:', user.id);
+
     // Fetch comprehensive user financial data
+    console.log('Fetching user financial data...');
     const [expensesResult, goalsResult, profileResult] = await Promise.all([
       supabaseClient.from('expenses').select('*').eq('user_id', user.id).order('date', { ascending: false }),
       supabaseClient.from('goals').select('*').eq('user_id', user.id).order('deadline', { ascending: true }),
       supabaseClient.from('profiles').select('*').eq('id', user.id).single()
     ]);
 
+    if (expensesResult.error) {
+      console.error('Error fetching expenses:', expensesResult.error);
+    }
+    if (goalsResult.error) {
+      console.error('Error fetching goals:', goalsResult.error);
+    }
+    if (profileResult.error) {
+      console.error('Error fetching profile:', profileResult.error);
+    }
+
     const expenses = expensesResult.data || [];
     const goals = goalsResult.data || [];
     const profile = profileResult.data;
 
-    console.log(`Processing request for user ${user.id}`);
     console.log(`Found ${expenses.length} expenses and ${goals.length} goals`);
 
     // Calculate comprehensive financial insights
@@ -72,14 +96,6 @@ serve(async (req) => {
       .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 5);
 
-    // Weekly spending pattern
-    const weeklySpending = expenses.reduce((acc, exp) => {
-      const expDate = new Date(exp.date);
-      const dayOfWeek = expDate.getDay();
-      acc[dayOfWeek] = (acc[dayOfWeek] || 0) + exp.amount;
-      return acc;
-    }, {} as Record<number, number>);
-
     // Goal progress analysis
     const goalAnalysis = goals.map(goal => {
       const progress = (goal.saved_amount / goal.target_amount) * 100;
@@ -97,7 +113,7 @@ serve(async (req) => {
         monthsLeft,
         monthlyNeeded,
         priority: goal.priority,
-        onTrack: monthlyNeeded <= (monthlyTotal * 0.3) // Can save 30% of monthly spending
+        onTrack: monthlyNeeded <= (monthlyTotal * 0.3)
       };
     });
 
@@ -127,12 +143,6 @@ CURRENT FINANCIAL STATUS:
 CATEGORY BREAKDOWN (Top 5):
 ${categoryAnalysis.map(([cat, amount]) => `- ${cat}: ${amount.toFixed(2)} MAD`).join('\n')}
 
-WEEKLY SPENDING PATTERN:
-${Object.entries(weeklySpending).map(([day, amount]) => {
-  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  return `- ${dayNames[parseInt(day)]}: ${amount.toFixed(2)} MAD`;
-}).join('\n')}
-
 GOALS ANALYSIS:
 ${goalAnalysis.map(goal => `
 - ${goal.name} (${goal.priority} priority):
@@ -152,10 +162,11 @@ ${monthlyExpenses.slice(0, 10).map(exp => `- ${new Date(exp.date).toLocaleDateSt
 USER QUESTION: ${message}
 `;
 
-    console.log('Calling Gemini API...');
+    console.log('Calling Google Gemini API...');
 
-    // Call Gemini API with comprehensive context
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${Deno.env.get('GEMINI_API_KEY')}`, {
+    // Call Google Gemini API with the provided API key
+    const geminiApiKey = 'AIzaSyCexW8RU1ufTLDA2mjRr1b-bkPBcxMCE9A';
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -172,6 +183,7 @@ PERSONALITY & STYLE:
 - Be encouraging but realistic
 - Respond in both English and Arabic when appropriate
 - Use MAD currency consistently
+- Support RTL (Right-to-Left) text direction for Arabic content
 
 ANALYSIS CAPABILITIES:
 - Detect spending patterns and anomalies
@@ -186,10 +198,11 @@ RESPONSE FORMAT:
 - Address their specific question with data-backed insights
 - Provide 2-3 specific actionable recommendations
 - End with encouragement and next steps
+- Include Arabic translations for key advice when relevant
 
 ${financialContext}
 
-Please analyze this data thoroughly and provide comprehensive financial advice based on the user's question.`
+Please analyze this data thoroughly and provide comprehensive financial advice based on the user's question. Make your response culturally appropriate for Moroccan users and include Arabic phrases where helpful.`
           }]
         }],
         generationConfig: {
@@ -199,19 +212,27 @@ Please analyze this data thoroughly and provide comprehensive financial advice b
       })
     });
 
+    console.log('Gemini API response status:', geminiResponse.status);
+
     if (!geminiResponse.ok) {
-      throw new Error(`Gemini API error: ${geminiResponse.status}`);
+      const errorText = await geminiResponse.text();
+      console.error('Gemini API error response:', errorText);
+      throw new Error(`Gemini API error: ${geminiResponse.status} - ${errorText}`);
     }
 
     const geminiData = await geminiResponse.json();
+    console.log('Gemini API response received');
     
     if (!geminiData.candidates || geminiData.candidates.length === 0) {
-      throw new Error('No response from AI');
+      console.error('No candidates in Gemini response:', geminiData);
+      throw new Error('No response from AI - empty candidates array');
     }
 
     const aiResponse = geminiData.candidates[0].content.parts[0].text;
+    console.log('AI response extracted successfully');
 
     // Store conversation in database
+    console.log('Storing conversation in database...');
     const { error: insertError } = await supabaseClient.from('consultant_conversations').insert({
       user_id: user.id,
       user_message: message,
@@ -226,6 +247,8 @@ Please analyze this data thoroughly and provide comprehensive financial advice b
 
     if (insertError) {
       console.error('Error storing conversation:', insertError);
+    } else {
+      console.log('Conversation stored successfully');
     }
 
     return new Response(JSON.stringify({ 
@@ -243,7 +266,11 @@ Please analyze this data thoroughly and provide comprehensive financial advice b
 
   } catch (error) {
     console.error('Error in financial-consultant function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      details: error.stack,
+      timestamp: new Date().toISOString()
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
