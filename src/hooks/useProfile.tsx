@@ -84,6 +84,12 @@ export const useProfile = () => {
       });
 
       await fetchProfile();
+      
+      // Trigger a custom event to notify other components about the profile update
+      window.dispatchEvent(new CustomEvent('profileUpdated', { 
+        detail: { ...profile, ...updates } 
+      }));
+      
       return true;
     } catch (error: any) {
       console.error('Error updating profile:', error);
@@ -134,6 +140,16 @@ export const useProfile = () => {
     }
   };
 
+  // Helper function to get display names
+  const getDisplayNames = () => {
+    return {
+      hasnaaName: profile?.first_name || 'Hasnaa',
+      achrafName: profile?.partner_first_name || 'Achraf',
+      hasnaaFullName: `${profile?.first_name || 'Hasnaa'} ${profile?.last_name || ''}`.trim(),
+      achrafFullName: `${profile?.partner_first_name || 'Achraf'} ${profile?.partner_last_name || ''}`.trim()
+    };
+  };
+
   useEffect(() => {
     fetchProfile();
   }, [user]);
@@ -144,5 +160,6 @@ export const useProfile = () => {
     updateProfile,
     uploadAvatar,
     refetch: fetchProfile,
+    getDisplayNames,
   };
 };

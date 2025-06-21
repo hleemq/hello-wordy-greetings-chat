@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFinance } from '@/context/FinanceContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -8,17 +8,33 @@ import { Button } from "@/components/ui/button";
 import { DarkModeToggle } from "@/components/ui/dark-mode-toggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Globe, UserRound, User } from 'lucide-react';
+import { LogOut, Globe, UserRound } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
 import { useNavigate } from 'react-router-dom';
 
 const Navigation = () => {
   const { state, dispatch } = useFinance();
   const { user, signOut } = useAuth();
-  const { profile } = useProfile();
+  const { profile, getDisplayNames } = useProfile();
   const { currentView, activeProfile } = state;
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
+  const [displayNames, setDisplayNames] = useState(() => getDisplayNames());
+
+  // Listen for profile updates
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      setDisplayNames(getDisplayNames());
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+  }, [getDisplayNames]);
+
+  // Update display names when profile changes
+  useEffect(() => {
+    setDisplayNames(getDisplayNames());
+  }, [profile, getDisplayNames]);
 
   const switchProfile = () => {
     dispatch({ 
@@ -40,10 +56,7 @@ const Navigation = () => {
     setLanguage(language === 'en' ? 'ar' : 'en');
   };
 
-  // Get the actual names from profile or fallback to default
-  const hasnaaDisplayName = profile?.first_name || 'Hasnaa';
-  const achrafDisplayName = profile?.partner_first_name || 'Achraf';
-  const currentDisplayName = activeProfile === 'Hasnaa' ? hasnaaDisplayName : achrafDisplayName;
+  const currentDisplayName = activeProfile === 'Hasnaa' ? displayNames.hasnaaName : displayNames.achrafName;
 
   const navItems = [
     { id: 'dashboard', label: t('dashboard') },
@@ -93,11 +106,16 @@ const Navigation = () => {
                     ) : (
                       <UserRound className="h-5 w-5" style={{ color: '#1EAEDB' }} />
                     )}
-                    <span>{t('active')}: {currentDisplayName}</span>
+                    <span className="hidden sm:inline">
+                      {language === 'ar' ? 'نشط' : t('active')}: {currentDisplayName}
+                    </span>
+                    <span className="sm:hidden">
+                      {currentDisplayName}
+                    </span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Switch between profiles</p>
+                  <p>Switch between {displayNames.hasnaaName} and {displayNames.achrafName}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -122,7 +140,7 @@ const Navigation = () => {
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={profile?.avatar_url || ''} />
                       <AvatarFallback className="text-xs bg-mindaro text-midnight">
-                        {(profile?.first_name?.[0] || 'H')}{(profile?.last_name?.[0] || 'A')}
+                        {(profile?.first_name?.[0] || 'H')}{(profile?.partner_first_name?.[0] || 'A')}
                       </AvatarFallback>
                     </Avatar>
                   </Button>

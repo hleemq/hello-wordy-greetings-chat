@@ -1,7 +1,7 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useGoals } from '@/hooks/useGoals';
+import { useProfile } from '@/hooks/useProfile';
 import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -13,7 +13,24 @@ import { Button } from "@/components/ui/button";
 const Dashboard = () => {
   const { expenses, loading: expensesLoading } = useExpenses();
   const { goals, loading: goalsLoading } = useGoals();
+  const { getDisplayNames } = useProfile();
   const { t } = useLanguage();
+  const [displayNames, setDisplayNames] = useState(() => getDisplayNames());
+
+  // Listen for profile updates
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      setDisplayNames(getDisplayNames());
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+  }, [getDisplayNames]);
+
+  // Update display names when profile changes
+  useEffect(() => {
+    setDisplayNames(getDisplayNames());
+  }, [getDisplayNames]);
 
   // Get recent expenses
   const recentExpenses = [...expenses]
@@ -101,11 +118,11 @@ const Dashboard = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="border rounded p-4 text-center">
-                  <div className="text-sm text-gray-500">{t('hasnaaPaid')}</div>
+                  <div className="text-sm text-gray-500">{displayNames.hasnaaName} Paid</div>
                   <div className="text-xl font-semibold">{hasnaaPaid.toFixed(2)} MAD</div>
                 </div>
                 <div className="border rounded p-4 text-center">
-                  <div className="text-sm text-gray-500">{t('achrafPaid')}</div>
+                  <div className="text-sm text-gray-500">{displayNames.achrafName} Paid</div>
                   <div className="text-xl font-semibold">{achrafPaid.toFixed(2)} MAD</div>
                 </div>
               </div>
@@ -113,8 +130,12 @@ const Dashboard = () => {
               <div className="border-t pt-4">
                 {whoOwes ? (
                   <div className="text-center p-3 bg-gray-50 rounded-md">
-                    <span className="font-medium">{whoOwes}</span> {t('owes')}{' '}
-                    <span className="font-medium">{whoOwes === 'Hasnaa' ? 'Achraf' : 'Hasnaa'}</span>{' '}
+                    <span className="font-medium">
+                      {whoOwes === 'Hasnaa' ? displayNames.hasnaaName : displayNames.achrafName}
+                    </span> {t('owes')}{' '}
+                    <span className="font-medium">
+                      {whoOwes === 'Hasnaa' ? displayNames.achrafName : displayNames.hasnaaName}
+                    </span>{' '}
                     <span className="text-lg font-semibold">{difference.toFixed(2)} MAD</span>
                   </div>
                 ) : (
@@ -153,7 +174,9 @@ const Dashboard = () => {
                         <div>
                           <div>{t(expense.category.toLowerCase())}</div>
                           <div className="text-xs text-gray-500">
-                            {new Date(expense.date).toLocaleDateString()} {t('by')} {expense.paid_by}
+                            {new Date(expense.date).toLocaleDateString()} {t('by')} {
+                              expense.paid_by === 'Hasnaa' ? displayNames.hasnaaName : displayNames.achrafName
+                            }
                           </div>
                         </div>
                         <div className="font-medium">{expense.amount.toFixed(2)} MAD</div>

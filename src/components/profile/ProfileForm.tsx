@@ -27,14 +27,22 @@ const ProfileForm = () => {
     }
   }, [profile]);
 
-  const handleUpdateProfile = async () => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
     setUpdating(true);
-    await updateProfile({
-      first_name: firstName,
-      last_name: lastName,
-      partner_first_name: partnerFirstName,
-      partner_last_name: partnerLastName,
+    
+    const success = await updateProfile({
+      first_name: firstName.trim() || null,
+      last_name: lastName.trim() || null,
+      partner_first_name: partnerFirstName.trim() || null,
+      partner_last_name: partnerLastName.trim() || null,
     });
+
+    if (success) {
+      // The profile hook will handle the global update notification
+      console.log('Profile updated successfully');
+    }
+    
     setUpdating(false);
   };
 
@@ -72,7 +80,7 @@ const ProfileForm = () => {
             <Avatar className="h-20 w-20">
               <AvatarImage src={profile?.avatar_url || ''} />
               <AvatarFallback className="text-lg font-franklin-medium bg-mindaro text-midnight">
-                {firstName.charAt(0)}{lastName.charAt(0)}
+                {(firstName || 'H').charAt(0).toUpperCase()}{(partnerFirstName || 'A').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
@@ -101,54 +109,72 @@ const ProfileForm = () => {
         <CardHeader>
           <CardTitle className="font-franklin-heavy text-midnight dark:text-cloud">Profile Information</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="firstName" className="font-franklin-medium text-midnight dark:text-cloud">Your First Name (Hasnaa)</Label>
-              <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Your first name"
-                className="border-mindaro/30 focus:border-sunshine"
-              />
+        <CardContent>
+          <form onSubmit={handleUpdateProfile} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName" className="font-franklin-medium text-midnight dark:text-cloud">
+                  Your First Name
+                </Label>
+                <Input
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Enter your first name"
+                  className="border-mindaro/30 focus:border-sunshine"
+                />
+                <p className="text-xs text-gray-500 mt-1">This will be used as "Hasnaa" in the app</p>
+              </div>
+              <div>
+                <Label htmlFor="lastName" className="font-franklin-medium text-midnight dark:text-cloud">
+                  Your Last Name
+                </Label>
+                <Input
+                  id="lastName"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Enter your last name"
+                  className="border-mindaro/30 focus:border-sunshine"
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="lastName" className="font-franklin-medium text-midnight dark:text-cloud">Your Last Name</Label>
-              <Input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Your last name"
-                className="border-mindaro/30 focus:border-sunshine"
-              />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="partnerFirstName" className="font-franklin-medium text-midnight dark:text-cloud">
+                  Partner's First Name
+                </Label>
+                <Input
+                  id="partnerFirstName"
+                  value={partnerFirstName}
+                  onChange={(e) => setPartnerFirstName(e.target.value)}
+                  placeholder="Enter partner's first name"
+                  className="border-mindaro/30 focus:border-sunshine"
+                />
+                <p className="text-xs text-gray-500 mt-1">This will be used as "Achraf" in the app</p>
+              </div>
+              <div>
+                <Label htmlFor="partnerLastName" className="font-franklin-medium text-midnight dark:text-cloud">
+                  Partner's Last Name
+                </Label>
+                <Input
+                  id="partnerLastName"
+                  value={partnerLastName}
+                  onChange={(e) => setPartnerLastName(e.target.value)}
+                  placeholder="Enter partner's last name"
+                  className="border-mindaro/30 focus:border-sunshine"
+                />
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="partnerFirstName" className="font-franklin-medium text-midnight dark:text-cloud">Partner's First Name (Achraf)</Label>
-              <Input
-                id="partnerFirstName"
-                value={partnerFirstName}
-                onChange={(e) => setPartnerFirstName(e.target.value)}
-                placeholder="Partner's first name"
-                className="border-mindaro/30 focus:border-sunshine"
-              />
-            </div>
-            <div>
-              <Label htmlFor="partnerLastName" className="font-franklin-medium text-midnight dark:text-cloud">Partner's Last Name</Label>
-              <Input
-                id="partnerLastName"
-                value={partnerLastName}
-                onChange={(e) => setPartnerLastName(e.target.value)}
-                placeholder="Partner's last name"
-                className="border-mindaro/30 focus:border-sunshine"
-              />
-            </div>
-          </div>
-          <Button onClick={handleUpdateProfile} disabled={updating} className="bg-sunshine hover:bg-sunshine/90 text-midnight">
-            {updating ? 'Updating...' : 'Update Profile'}
-          </Button>
+            
+            <Button 
+              type="submit" 
+              disabled={updating} 
+              className="bg-sunshine hover:bg-sunshine/90 text-midnight w-full md:w-auto"
+            >
+              {updating ? 'Updating...' : 'Update Profile'}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
