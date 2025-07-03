@@ -35,10 +35,10 @@ const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen w-full bg-background text-foreground flex flex-col overflow-x-hidden">
       <Navigation />
-      <main className="flex-1 pt-16 pb-4 md:pb-8 overflow-hidden">
-        <div className="h-full">
+      <main className="flex-1 w-full overflow-x-hidden">
+        <div className="w-full max-w-full">
           {renderPage()}
         </div>
       </main>

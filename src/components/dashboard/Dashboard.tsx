@@ -86,8 +86,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="w-full max-w-7xl mx-auto px-4 py-6 pt-20">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <BalanceCard 
           hasnaaPaid={hasnaaPaid}
           achrafPaid={achrafPaid}
